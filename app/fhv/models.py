@@ -51,15 +51,17 @@ class Customer(Person):
     id = db.Column(db.Integer, db.ForeignKey('person.id'), primary_key=True)
     balance = db.Column(db.Float, default=0.0)
     address = db.Column(db.String(100), nullable=True)
+    max_owing = db.Column(db.Float, default=100.0)
 
     __mapper_args__ = {
         'polymorphic_identity': 'customer',
     }
 
-    def __init__(self, firstname: str, lastname: str, username: str, password: str, address: str):
+    def __init__(self, firstname: str, lastname: str, username: str, password: str, address: str = None, max_owing: float = 100.0):
         super().__init__(firstname=firstname, lastname=lastname,
                          username=username, password=password)
         self.address = address
+        self.max_owing = max_owing
 
     def __repr__(self):
         return f"<Customer(id={self.id}, firstname={self.firstname}, lastname={self.lastname}, balance={self.balance})>"

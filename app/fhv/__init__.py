@@ -2,6 +2,7 @@ from flask import Flask
 from fhv.exts import db
 from .config import DevelopmentConfig
 from .blueprints.user import bp as user_bp
+from .models import Customer, Staff, CorporateCustomer, Person
 
 
 def create_app(config_class=DevelopmentConfig):
