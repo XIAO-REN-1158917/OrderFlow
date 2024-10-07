@@ -37,8 +37,8 @@ class Staff(Person):
         'polymorphic_identity': 'staff',
     }
 
-    def __init__(self, department: str, **kwargs):
-        super().__init__(**kwargs)
+    def __init__(self, firstname: str, lastname: str, username: str, password: str, department: str):
+        super().__init__(firstname, lastname, username, password)
         self.department = department
 
     def __repr__(self):
@@ -60,8 +60,8 @@ class Customer(Person):
         'polymorphic_identity': 'customer',
     }
 
-    def __init__(self, address: str = None, **kwargs):
-        super().__init__(**kwargs)
+    def __init__(self, firstname: str, lastname: str, username: str, password: str, address: str = None):
+        super().__init__(firstname, lastname, username, password)
         self.address = address
 
     def __repr__(self):
@@ -77,10 +77,8 @@ class CorporateCustomer(Customer):
         'polymorphic_identity': 'corporate_customer',
     }
 
-    def __init__(self, credit_limit: float, **kwargs):
-        # corporate customer does not need max_owing
-        kwargs.pop('max_owing', None)
-        super().__init__(**kwargs)
+    def __init__(self, firstname: str, lastname: str, username: str, password: str, address: str, credit_limit: float):
+        super().__init__(firstname, lastname, username, password, address)
         self.credit_limit = credit_limit
 
     def __repr__(self):
@@ -122,8 +120,8 @@ class PayByCredit(Payment):
         'polymorphic_identity': 'pay_by_credit',
     }
 
-    def __init__(self, card_number: str, cardholder: str, expiry: str, cvv: str, **kwargs):
-        super().__init__(**kwargs)
+    def __init__(self, amount: float, customer_id: int, card_number: str, cardholder: str, expiry: str, cvv: str):
+        super().__init__(amount, customer_id)
         self.card_number = card_number
         self.cardholder = cardholder
         self.expiry = expiry
@@ -145,8 +143,8 @@ class PayByDebit(Payment):
         'polymorphic_identity': 'pay_by_debit',
     }
 
-    def __init__(self, account_number: str, bank_name: str, payee: str, **kwargs):
-        super().__init__(**kwargs)
+    def __init__(self, amount: float, customer_id: int, account_number: str, bank_name: str, payee: str):
+        super().__init__(amount, customer_id)
         self.account_number = account_number
         self.bank_name = bank_name
         self.payee = payee
@@ -156,33 +154,22 @@ class PayByDebit(Payment):
                 f"account_number={self.account_number}, bank_name={self.bank_name}, payee={self.payee}, customer_id={self.customer_id})>")
 
 
-class Product(db.Model):
-    __tablename__ = 'product'
+class Item(db.Model):
+    __tablename__ = 'item'
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(50), nullable=False)
-    price = db.Column(Numeric(10, 2), nullable=False)
-
     type = db.Column(db.String(50))
+
     __mapper_args__ = {
-        'polymorphic_identity': 'product',
         'polymorphic_on': type,
     }
 
-    order_items = db.relationship('OrderItem', back_populates='product')
-
-    def __init__(self, name: str, price: float):
-        self.name = name
-        self.price = price
-
-    def __repr__(self):
-        return f"<Product(id={self.id}, name='{self.name}', price={self.price}, type='{self.type}')>"
+    order_items = db.relationship('OrderLine', back_populates='item')
 
 
-class Veggies(Product):
+class Veggies(Item):
     __tablename__ = 'veggies'
-    id = db.Column(db.Integer, db.ForeignKey('product.id'), primary_key=True)
-    pricing_unit = db.Column(
-        db.Enum('per_kilo', 'per_pack', 'per_unit'), name='pricing_unit', nullable=False)
+    id = db.Column(db.Integer, db.ForeignKey('item.id'), primary_key=True)
+    name = db.Column(db.String(50), nullable=False)
 
     __mapper_args__ = {
         'polymorphic_identity': 'veggies',
@@ -191,19 +178,66 @@ class Veggies(Product):
     contents = db.relationship(
         'PremadeBoxContent', back_populates='veggies', cascade='all, delete-orphan')
 
-    def __init__(self, pricing_unit: str, **kwargs):
-        super().__init__(**kwargs)
-        self.pricing_unit = pricing_unit
+    def __init__(self, name: str):
+        super().__init__()
+        self.name = name
 
     def __repr__(self):
-        return f"<Veggies(id={self.id}, name='{self.name}', pricing_unit='{self.pricing_unit}', price={self.price})>"
+        return f"<Veggies(id={self.id}, name='{self.name}')>"
 
 
-class PremadeBox(Product):
+class WeightedVeggie(Veggies):
+    __tablename__ = 'weighted_veggie'
+    id = db.Column(db.Integer, db.ForeignKey('veggies.id'), primary_key=True)
+    price_per_kilo = db.Column(Numeric(10, 2), nullable=False)
+    weight = db.Column(Numeric(10, 2), nullable=True)
+
+    __mapper_args__ = {
+        'polymorphic_identity': 'weighted_veggie',
+    }
+
+    def __init__(self, name: str, price_per_kilo: float):
+        super().__init__(name)
+        self.price_per_kilo = price_per_kilo
+
+
+class PackVeggie(Veggies):
+    __tablename__ = 'pack_veggie'
+    id = db.Column(db.Integer, db.ForeignKey('veggies.id'), primary_key=True)
+    price_per_pack = db.Column(Numeric(10, 2), nullable=False)
+    num_of_packs = db.Column(db.Integer, nullable=True)
+
+    __mapper_args__ = {
+        'polymorphic_identity': 'pack_veggie',
+    }
+
+    def __init__(self, name: str, price_per_pack: float):
+        super().__init__(name)
+        self.price_per_pack = price_per_pack
+
+
+class UnitVeggie(Veggies):
+    __tablename__ = 'unit_veggie'
+    id = db.Column(db.Integer, db.ForeignKey('veggies.id'), primary_key=True)
+    price_per_unit = db.Column(Numeric(10, 2), nullable=False)
+    quantity = db.Column(db.Integer, nullable=True)
+
+    __mapper_args__ = {
+        'polymorphic_identity': 'unit_veggie',
+    }
+
+    def __init__(self, name: str, price_per_unit: float):
+        super().__init__(name)
+        self.price_per_unit = price_per_unit
+
+
+class PremadeBox(Item):
     __tablename__ = 'premade_box'
-    id = db.Column(db.Integer, db.ForeignKey('product.id'), primary_key=True)
+    id = db.Column(db.Integer, db.ForeignKey('item.id'), primary_key=True)
     box_size = db.Column(db.Enum('small', 'medium', 'large'),
                          name='premade_box_size', nullable=False)
+    price = db.Column(Numeric(10, 2), nullable=False)
+    num_of_boxes = db.Column(db.Integer, nullable=True)
 
     __mapper_args__ = {
         'polymorphic_identity': 'premade_box',
@@ -212,12 +246,14 @@ class PremadeBox(Product):
     contents = db.relationship(
         'PremadeBoxContent', back_populates='premade_box', cascade='all, delete-orphan')
 
-    def __init__(self, box_size: str, **kwargs):
-        super().__init__(**kwargs)
+    def __init__(self, box_size: str, price: float, num_of_boxes: int):
+        super().__init__()
         self.box_size = box_size
+        self.price = price
+        self.num_of_boxes = num_of_boxes
 
     def __repr__(self):
-        return f"<PremadeBox(id={self.id}, name='{self.name}', box_size='{self.box_size}', price={self.price})>"
+        return f"<PremadeBox(id={self.id}, box_size='{self.box_size}', price={self.price})>"
 
 
 class PremadeBoxContent(db.Model):
@@ -242,25 +278,23 @@ class PremadeBoxContent(db.Model):
         return f"<PremadeBoxContent(id={self.id}, premade_box_id={self.premade_box_id}, veggies_id={self.veggies_id}, quantity={self.quantity})>"
 
 
-class OrderItem(db.Model):
+class OrderLine(db.Model):
     __tablename__ = 'order_item'
     id = db.Column(db.Integer, primary_key=True)
-    quantity = db.Column(db.Float, nullable=False)
 
-    product_id = db.Column(db.Integer, db.ForeignKey(
-        'product.id'), nullable=False)
-    product = db.relationship('Product', back_populates='order_items')
+    item_id = db.Column(db.Integer, db.ForeignKey(
+        'item.id'), nullable=False)
+    item = db.relationship('Item', back_populates='order_items')
 
     order_id = db.Column(db.Integer, db.ForeignKey('order.id'), nullable=False)
     order = db.relationship('Order', back_populates='order_items')
 
-    def __init__(self, product_id: int, quantity: float, order_id: int):
-        self.product_id = product_id
-        self.quantity = quantity
+    def __init__(self, item_id: int, order_id: int):
+        self.item_id = item_id
         self.order_id = order_id
 
     def __repr__(self):
-        return f"<OrderItem(id={self.id}, product_id={self.product_id}, quantity={self.quantity}, order_id={self.order_id})>"
+        return f"<OrderItem(id={self.id}, item_id={self.item_id}, order_id={self.order_id})>"
 
 
 class Order(db.Model):
@@ -277,12 +311,11 @@ class Order(db.Model):
     order_date = db.Column(db.Date, nullable=False, default=date.today)
     delivery_fee = db.Column(Numeric(10, 2), nullable=False, default=10.0)
     is_delivery = db.Column(db.Boolean, nullable=False, default=False)
-    total_amount = db.Column(Numeric(10, 2), nullable=False, default=0.0)
 
     status = db.Column(db.Enum('draft', 'pending', 'processing', 'completed', 'canceled', 'refunded', name='order_status'),
                        nullable=False, default='draft')
 
-    def __init__(self, customer_id, is_delivery=False):
+    def __init__(self, customer_id: int, is_delivery: bool = False):
         self.customer_id = customer_id
         self.is_delivery = is_delivery
 
