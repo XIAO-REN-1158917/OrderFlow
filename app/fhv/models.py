@@ -50,11 +50,11 @@ class Customer(Person):
     id = db.Column(db.Integer, db.ForeignKey('person.id'), primary_key=True)
     balance = db.Column(Numeric(10, 2), default=0.0)
     address = db.Column(db.String(100), nullable=True)
-    max_owing = db.Column(Numeric(10, 2), default=100.0)
     payments = db.relationship(
         'Payment', back_populates='customer', cascade='all, delete-orphan')
     orders = db.relationship(
         'Order', back_populates='customer', cascade='all, delete-orphan')
+    max_owing = 100.0
 
     __mapper_args__ = {
         'polymorphic_identity': 'customer',
@@ -100,7 +100,7 @@ class Payment(db.Model):
         'polymorphic_on': type,
     }
 
-    def __init__(self, amount: float, customer_id: int):
+    def __init__(self, amount: Numeric, customer_id: int):
         self.amount = amount
         self.customer_id = customer_id
 
@@ -163,7 +163,7 @@ class Item(db.Model):
         'polymorphic_on': type,
     }
 
-    order_items = db.relationship('OrderLine', back_populates='item')
+    order_items = db.relationship('OrderItem', back_populates='item')
 
 
 class Veggies(Item):
@@ -196,9 +196,10 @@ class WeightedVeggie(Veggies):
         'polymorphic_identity': 'weighted_veggie',
     }
 
-    def __init__(self, name: str, price_per_kilo: float):
+    def __init__(self, name: str, price_per_kilo: Numeric, weight: Numeric):
         super().__init__(name)
         self.price_per_kilo = price_per_kilo
+        self.weight = weight
 
 
 class PackVeggie(Veggies):
@@ -211,9 +212,10 @@ class PackVeggie(Veggies):
         'polymorphic_identity': 'pack_veggie',
     }
 
-    def __init__(self, name: str, price_per_pack: float):
+    def __init__(self, name: str, price_per_pack: Numeric, num_of_packs: int):
         super().__init__(name)
         self.price_per_pack = price_per_pack
+        self.num_of_packs = num_of_packs
 
 
 class UnitVeggie(Veggies):
@@ -226,9 +228,10 @@ class UnitVeggie(Veggies):
         'polymorphic_identity': 'unit_veggie',
     }
 
-    def __init__(self, name: str, price_per_unit: float):
+    def __init__(self, name: str, price_per_unit: Numeric, quantity: int):
         super().__init__(name)
         self.price_per_unit = price_per_unit
+        self.quantity = quantity
 
 
 class PremadeBox(Item):
@@ -236,7 +239,6 @@ class PremadeBox(Item):
     id = db.Column(db.Integer, db.ForeignKey('item.id'), primary_key=True)
     box_size = db.Column(db.Enum('small', 'medium', 'large'),
                          name='premade_box_size', nullable=False)
-    price = db.Column(Numeric(10, 2), nullable=False)
     num_of_boxes = db.Column(db.Integer, nullable=True)
 
     __mapper_args__ = {
@@ -246,14 +248,13 @@ class PremadeBox(Item):
     contents = db.relationship(
         'PremadeBoxContent', back_populates='premade_box', cascade='all, delete-orphan')
 
-    def __init__(self, box_size: str, price: float, num_of_boxes: int):
+    def __init__(self, box_size: str, num_of_boxes: int):
         super().__init__()
         self.box_size = box_size
-        self.price = price
         self.num_of_boxes = num_of_boxes
 
     def __repr__(self):
-        return f"<PremadeBox(id={self.id}, box_size='{self.box_size}', price={self.price})>"
+        return f"<PremadeBox(id={self.id}, box_size='{self.box_size}', num_box='{self.num_of_boxes}')>"
 
 
 class PremadeBoxContent(db.Model):
@@ -264,21 +265,19 @@ class PremadeBoxContent(db.Model):
         'premade_box.id'), nullable=False)
     veggies_id = db.Column(db.Integer, db.ForeignKey(
         'veggies.id'), nullable=False)
-    quantity = db.Column(db.Float, nullable=False)
 
     premade_box = db.relationship('PremadeBox', back_populates='contents')
     veggies = db.relationship('Veggies', back_populates='contents')
 
-    def __init__(self, premade_box_id: int, veggies_id: int, quantity: float):
+    def __init__(self, premade_box_id: int, veggies_id: int):
         self.premade_box_id = premade_box_id
         self.veggies_id = veggies_id
-        self.quantity = quantity
 
     def __repr__(self):
-        return f"<PremadeBoxContent(id={self.id}, premade_box_id={self.premade_box_id}, veggies_id={self.veggies_id}, quantity={self.quantity})>"
+        return f"<PremadeBoxContent(id={self.id}, premade_box_id={self.premade_box_id}, veggies_id={self.veggies_id})>"
 
 
-class OrderLine(db.Model):
+class OrderItem(db.Model):
     __tablename__ = 'order_item'
     id = db.Column(db.Integer, primary_key=True)
 
@@ -312,7 +311,7 @@ class Order(db.Model):
     delivery_fee = db.Column(Numeric(10, 2), nullable=False, default=10.0)
     is_delivery = db.Column(db.Boolean, nullable=False, default=False)
 
-    status = db.Column(db.Enum('draft', 'pending', 'processing', 'completed', 'canceled', 'refunded', name='order_status'),
+    status = db.Column(db.Enum('draft', 'pending', 'processing', 'completed', 'canceled', name='order_status'),
                        nullable=False, default='draft')
 
     def __init__(self, customer_id: int, is_delivery: bool = False):
