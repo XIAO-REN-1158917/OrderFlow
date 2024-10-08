@@ -1,5 +1,2 @@
-from dao.staff_dao import StaffDAO
-
-
-class StaffService:
-    pass
+from flask import session
+from dao.user_dao import PersonDAO

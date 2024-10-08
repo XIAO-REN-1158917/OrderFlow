@@ -24,6 +24,9 @@ class Person(db.Model):
         self.username = username
         self.password = password
 
+    def check_password(self, password: str) -> bool:
+        return self.password == password
+
     def __repr__(self):
         return f"<Person(id={self.id}, firstname={self.firstname}, lastname={self.lastname}, username={self.username})>"
 
