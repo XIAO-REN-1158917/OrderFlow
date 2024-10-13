@@ -1,4 +1,4 @@
-from flask import Blueprint, redirect, url_for
+from flask import Blueprint, redirect, session, url_for
 from flask import render_template
 from flask import request
 from fhv.services.user_service import LoginService
@@ -31,3 +31,9 @@ def login():
 
     else:
         return render_template('login.html')
+
+
+@bp.route('/logout')
+def logout():
+    session.clear()
+    return redirect('login')

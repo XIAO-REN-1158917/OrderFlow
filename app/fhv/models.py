@@ -193,7 +193,7 @@ class WeightedVeggie(Veggies):
     __tablename__ = 'weighted_veggie'
     id = db.Column(db.Integer, db.ForeignKey('veggies.id'), primary_key=True)
     price_per_kilo = db.Column(Numeric(10, 2), nullable=False)
-    weight = db.Column(Numeric(10, 2), nullable=True)
+    weight = db.Column(Numeric(10, 2), nullable=False)
 
     __mapper_args__ = {
         'polymorphic_identity': 'weighted_veggie',
@@ -209,7 +209,7 @@ class PackVeggie(Veggies):
     __tablename__ = 'pack_veggie'
     id = db.Column(db.Integer, db.ForeignKey('veggies.id'), primary_key=True)
     price_per_pack = db.Column(Numeric(10, 2), nullable=False)
-    num_of_packs = db.Column(db.Integer, nullable=True)
+    num_of_packs = db.Column(db.Integer, nullable=False)
 
     __mapper_args__ = {
         'polymorphic_identity': 'pack_veggie',
@@ -225,7 +225,7 @@ class UnitVeggie(Veggies):
     __tablename__ = 'unit_veggie'
     id = db.Column(db.Integer, db.ForeignKey('veggies.id'), primary_key=True)
     price_per_unit = db.Column(Numeric(10, 2), nullable=False)
-    quantity = db.Column(db.Integer, nullable=True)
+    quantity = db.Column(db.Integer, nullable=False)
 
     __mapper_args__ = {
         'polymorphic_identity': 'unit_veggie',
@@ -242,7 +242,7 @@ class PremadeBox(Item):
     id = db.Column(db.Integer, db.ForeignKey('item.id'), primary_key=True)
     box_size = db.Column(db.Enum('small', 'medium', 'large'),
                          name='premade_box_size', nullable=False)
-    num_of_boxes = db.Column(db.Integer, nullable=True)
+    num_of_boxes = db.Column(db.Integer, nullable=False)
 
     __mapper_args__ = {
         'polymorphic_identity': 'premade_box',
@@ -286,13 +286,15 @@ class OrderItem(db.Model):
 
     item_id = db.Column(db.Integer, db.ForeignKey(
         'item.id'), nullable=False)
+    item_price = db.Column(Numeric(10, 2), nullable=False)
     item = db.relationship('Item', back_populates='order_items')
 
     order_id = db.Column(db.Integer, db.ForeignKey('order.id'), nullable=False)
     order = db.relationship('Order', back_populates='order_items')
 
-    def __init__(self, item_id: int, order_id: int):
+    def __init__(self, item_id: int, item_price: Numeric, order_id: int):
         self.item_id = item_id
+        self.item_price = item_price
         self.order_id = order_id
 
     def __repr__(self):
@@ -311,15 +313,17 @@ class Order(db.Model):
         'OrderItem', back_populates='order', cascade='all, delete-orphan')
 
     order_date = db.Column(db.Date, nullable=False, default=date.today)
-    delivery_fee = db.Column(Numeric(10, 2), nullable=False, default=10.0)
     is_delivery = db.Column(db.Boolean, nullable=False, default=False)
 
     status = db.Column(db.Enum('draft', 'pending', 'processing', 'completed', 'canceled', name='order_status'),
                        nullable=False, default='draft')
+    order_price = db.Column(Numeric(10, 2), nullable=False, default=0.00)
+    delivery_fee = 10.0
 
-    def __init__(self, customer_id: int, is_delivery: bool = False):
+    def __init__(self, customer_id: int, is_delivery: bool = False, order_price: Numeric = 0.00):
         self.customer_id = customer_id
         self.is_delivery = is_delivery
+        self.order_price = order_price
 
     def __repr__(self):
         return f"<Order(id={self.id}, customer_id={self.customer_id}, is_delivery={self.is_delivery}, status={self.status})>"

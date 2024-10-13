@@ -11,6 +11,7 @@ class LoginService:
 
         if person and person.check_password(password):
             session['user_id'] = person.id
+            session['user_username'] = person.username
             session['user_type'] = person.type
             return {"success": True, "message": "Login successful", "user": person.username, "type": person.type}
         else:

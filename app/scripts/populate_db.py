@@ -42,35 +42,42 @@ def populate_data():
                                        username='ccustomer13', password='ccustomer123', address='Hornby Chch', credit_limit=6000.0)
 
         # veggies
-        weightedVeggie1 = WeightedVeggie(
-            name="Carrot(wei)", price_per_kilo=2.50, weight=1)
-        weightedVeggie2 = WeightedVeggie(
-            name="Tomato(wei)", price_per_kilo=5.50, weight=2)
+        # order1 pcustomer4
         weightedVeggie3 = WeightedVeggie(
             name="Potato(wei)", price_per_kilo=3.50, weight=1.5)
 
-        packVeggie1 = PackVeggie(
-            name="Spinach(pack)", price_per_pack=3.5, num_of_packs=2)
-        packVeggie2 = PackVeggie(
-            name="Onion(pack)", price_per_pack=6.5, num_of_packs=3)
-        packVeggie3 = PackVeggie(
-            name="Zucchini(pack)", price_per_pack=4.8, num_of_packs=4)
-
-        unitVeggie1 = UnitVeggie(
-            name="Cucumber(unit)", price_per_unit=2.9, quantity=2)
-        unitVeggie2 = UnitVeggie(
-            name="Lettuce(unit)", price_per_unit=3.9, quantity=2)
+        # order2 pcustomer5
         unitVeggie3 = UnitVeggie(
             name="Broccoli(unit)", price_per_unit=2.9, quantity=3)
 
         # PremadeBox
-        premade_box1 = PremadeBox(box_size="small", num_of_boxes=1)
-        premade_box2 = PremadeBox(box_size="medium", num_of_boxes=1)
-        premade_box3 = PremadeBox(box_size="large", num_of_boxes=1)
         # every item = 1 kilo or 1 packs or 1 unit (any type of veggie)
         # small = 3 items
         # medium = 5 items
         # large = 8 items
+
+        premade_box1 = PremadeBox(box_size="small", num_of_boxes=1)
+        # order3 ccustomer9 small
+        weightedVeggie1 = WeightedVeggie(
+            name="Carrot(wei)", price_per_kilo=2.50, weight=1)
+        packVeggie1 = PackVeggie(
+            name="Spinach(pack)", price_per_pack=3.5, num_of_packs=2)
+
+        premade_box2 = PremadeBox(box_size="medium", num_of_boxes=1)
+        # order3 ccustomer9 medium
+        weightedVeggie2 = WeightedVeggie(
+            name="Tomato(wei)", price_per_kilo=5.50, weight=2)
+        packVeggie2 = PackVeggie(
+            name="Onion(pack)", price_per_pack=6.5, num_of_packs=3)
+
+        premade_box3 = PremadeBox(box_size="large", num_of_boxes=1)
+        # order3 ccustomer9 large 19.2 5.8 7.8
+        packVeggie3 = PackVeggie(
+            name="Zucchini(pack)", price_per_pack=4.8, num_of_packs=4)
+        unitVeggie1 = UnitVeggie(
+            name="Cucumber(unit)", price_per_unit=2.9, quantity=2)
+        unitVeggie2 = UnitVeggie(
+            name="Lettuce(unit)", price_per_unit=3.9, quantity=2)
 
         db.session.add_all([staff1, staff2, staff3,
                             customer1, customer2, customer3, customer4, customer5,
@@ -96,15 +103,15 @@ def populate_data():
         unitVeggie1 = unitVeggie1.id
         unitVeggie2 = unitVeggie2.id
 
-        order1 = Order(4)
-        order2 = Order(5)
-        order3 = Order(9)
+        order1 = Order(4, False, 5.25)
+        order2 = Order(5, False, 8.7)
+        order3 = Order(9, False, 72.8)
 
-        orderItem1 = OrderItem(3, 1)
-        orderItem2 = OrderItem(9, 2)
-        orderItem3 = OrderItem(10, 3)
-        orderItem4 = OrderItem(11, 3)
-        orderItem5 = OrderItem(12, 3)
+        orderItem1 = OrderItem(3, 5.25, 1)
+        orderItem2 = OrderItem(9, 8.7, 2)
+        orderItem3 = OrderItem(10, 9.5, 3)
+        orderItem4 = OrderItem(11, 30.5, 3)
+        orderItem5 = OrderItem(12, 32.8, 3)
 
         # PremadeBoxContent
         premade_box_content1 = PremadeBoxContent(

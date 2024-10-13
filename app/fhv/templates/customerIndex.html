@@ -9,6 +9,186 @@
 
 <body>
     <p>This is customer index page</p>
+
+    <h2>Welcome,{{session.get('user_username',none)}}</h2>
+    {% if not draft_order_details %}
+    <a href="{{url_for('customer.newOrder')}}">New Order</a>
+    {% endif %}
+
+    <form method="post" action="{{url_for('customer.addItemVeggie')}}">
+        <h2>Veggies</h2>
+        <select name="veggies" id="veggie-select" required onchange="showPrice()">
+            <option value="" disabled selected>Veggies</option>
+            {% for veggie in data['veggies'] %}
+            <option value="{{ veggie.name }}" data-price="{{ veggie.price }}" data-unit="{{ veggie.unit }}">{{
+                veggie.name
+                }}
+            </option>
+            {% endfor %}
+        </select>
+
+        <!-- price of veggie -->
+        <p id="veggie-price"></p>
+
+        <!-- quantity of veggie -->
+        <div id="quantity-container" style="display:none;">
+            <label for="quantity" id="quantity-label">Quantity:</label>
+            <input type="number" id="quantity" name="quantity" min="1" step="1" placeholder="Enter quantity" required>
+        </div>
+
+        <button type="submit" disabled id="submit-button">Add To Cart</button>
+    </form>
+
+    {% if draft_order_details %}
+    <h2>Draft Order Details</h2>
+    <p>Order ID: {{ draft_order_details['order'].id }}</p>
+    <p>Order date: {{draft_order_details['order'].order_date}}</p>
+    <p>Delivery: {{draft_order_details['order'].is_delivery}}</p>
+    <p>status: {{draft_order_details['order'].status}}</p>
+    <p>Order Amount: {{draft_order_details['order'].order_price}}</p>
+    <table>
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Price</th>
+                <th>Quantity</th>
+                <th>Item Amount</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in draft_order_details['items'] %}
+            <tr>
+                <td>{{item['item_name']}}</td>
+                {% if item['per_price'] %}
+                <td>{{item['per_price']}}</td>
+                {% else %}
+                <td> </td>
+                {% endif %}
+                <td>{{item['quantity']}}</td>
+                <td>{{item['item_price']}}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
+
+
+
+    <h2>Premade Box</h2>
+    <select name="premade_box" id="premade-box-select" onchange="showBoxOptions()">
+        <option value="" disabled selected>Premade Box</option>
+        {% for box in data['premade_boxes'] %}
+        <option value="{{ box.name }}" data-capacity="{{ box.capacity }}">{{ box.name }}</option>
+        {% endfor %}
+    </select>
+
+
+    <!-- Premade Box -->
+    <div id="box-description" style="display:none;">
+        <p>Small Box = 3 items</p>
+        <p>Medium Box = 5 items</p>
+        <p>Large Box = 8 items</p>
+        <p>Every item = 1 kg OR 1 pack OR 1 unit (any type of veggie)</p>
+    </div>
+
+    <!-- items in premade boxes -->
+    <div id="box-veggies-container"></div>
+
+    <!-- Premade Box price -->
+    <p id="box-price"></p>
+
+    <script>
+        function showPrice() {
+            var select = document.getElementById("veggie-select");
+            var selectedOption = select.options[select.selectedIndex];
+            var price = selectedOption.getAttribute("data-price");
+            var unit = selectedOption.getAttribute("data-unit");
+
+            if (price && unit) {
+                document.getElementById("veggie-price").innerHTML = "Price: " + price + unit;
+                document.getElementById("quantity-container").style.display = "block";
+                document.getElementById("submit-button").disabled = false;
+
+                var quantityLabel = document.getElementById("quantity-label");
+                var quantityInput = document.getElementById("quantity");
+
+                if (unit === "/Kg") {
+                    quantityLabel.innerHTML = "Quantity: (Keep one decimal places)";
+                    quantityInput.min = "0.1";
+                    quantityInput.step = "0.1";
+                    quantityInput.placeholder = "Enter quantity (e.g., 1.5)";
+
+                } else {
+                    quantityLabel.innerHTML = "Quantity: (Keep integers)";
+                    quantityInput.min = "1";
+                    quantityInput.step = "1";
+                    quantityInput.placeholder = "Enter quantity (e.g., 1)";
+                }
+            } else {
+                document.getElementById("veggie-price").innerHTML = "Please select veggie";
+                document.getElementById("quantity-container").style.display = "none";
+                document.getElementById("submit-button").disabled = true;
+            }
+        }
+
+        function showBoxOptions() {
+            var select = document.getElementById("premade-box-select");
+            var selectedOption = select.options[select.selectedIndex];
+            var capacity = selectedOption.getAttribute("data-capacity");
+
+            document.getElementById("box-description").style.display = "block";
+
+            var boxVeggiesContainer = document.getElementById("box-veggies-container");
+            boxVeggiesContainer.innerHTML = "";
+
+            for (var i = 0; i < capacity; i++) {
+                var label = document.createElement("label");
+                label.innerHTML = "Veggie Option " + (i + 1) + ": ";
+
+                var selectBox = document.createElement("select");
+                selectBox.name = "veggie-option-" + (i + 1);
+                selectBox.id = "veggie-option-" + (i + 1);
+                selectBox.onchange = calculateBoxPrice;
+
+                var veggieSelect = document.getElementById("veggie-select");
+                var options = veggieSelect.options;
+
+                for (var j = 0; j < options.length; j++) {
+                    var option = document.createElement("option");
+                    option.value = options[j].value;
+                    option.text = options[j].text;
+                    var price = options[j].getAttribute("data-price");
+
+                    if (price) {
+                        option.setAttribute("data-price-item", price);
+                    }
+
+                    selectBox.appendChild(option);
+                }
+
+                boxVeggiesContainer.appendChild(label);
+                boxVeggiesContainer.appendChild(selectBox);
+                boxVeggiesContainer.appendChild(document.createElement("br"));
+            }
+        }
+
+        function calculateBoxPrice() {
+            var boxVeggiesContainer = document.getElementById("box-veggies-container");
+            var selects = boxVeggiesContainer.getElementsByTagName("select");
+            var totalPrice = 0;
+
+            for (var i = 0; i < selects.length; i++) {
+                var selectedOption = selects[i].options[selects[i].selectedIndex];
+                var price = selectedOption.getAttribute("data-price-item");
+
+                if (price) {
+                    totalPrice += parseFloat(price);
+                }
+            }
+
+            document.getElementById("box-price").innerHTML = "Premade Box Price: $" + totalPrice.toFixed(2);
+        }    
+    </script>
 </body>
 
 </html>
