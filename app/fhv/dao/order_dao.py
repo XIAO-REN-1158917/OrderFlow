@@ -11,7 +11,6 @@ class OrderDAO:
         return draft_order
 
     def get_draft_order_items(self, draft_order_id):
-
         item_list = []
 
         itemLines = db.session.query(
@@ -24,48 +23,54 @@ class OrderDAO:
             filter(OrderItem.order_id == draft_order_id).all()
 
         for line in itemLines:
-            item_detail = {}
-            item_detail['item_price'] = line.item_price
+            item_detail = {
+                'item_price': line.item_price
+            }
 
-            if line.type == 'weighted_veggie':
-                wei_veggie = self.get_item_detail_veggie(line.item_id)
-                item_detail['item_id'] = wei_veggie.id
-                item_detail['item_name'] = wei_veggie.name
-                item_detail['per_price'] = wei_veggie.price_per_kilo
-                item_detail['quantity'] = wei_veggie.weight
+            type_map = {
+                'weighted_veggie': ('price_per_kilo', 'weight'),
+                'unit_veggie': ('price_per_unit', 'quantity'),
+                'pack_veggie': ('price_per_pack', 'num_of_packs'),
+                'premade_box': (None, 'num_of_boxes')
+            }
 
-            elif line.type == 'unit_veggie':
-                unit_veggie = self.get_item_detail_veggie(line.item_id)
-                item_detail['item_id'] = unit_veggie.id
-                item_detail['item_name'] = unit_veggie.name
-                item_detail['per_price'] = unit_veggie.price_per_unit
-                item_detail['quantity'] = unit_veggie.quantity
+            item = self.get_item_detail(line.item_id)
+            if line.type in type_map:
+                price_attr, quantity_attr = type_map[line.type]
 
-            elif line.type == 'pack_veggie':
-                pack_veggie = self.get_item_detail_veggie(line.item_id)
-                item_detail['item_id'] = pack_veggie.id
-                item_detail['item_name'] = pack_veggie.name
-                item_detail['per_price'] = pack_veggie.price_per_pack
-                item_detail['quantity'] = pack_veggie.num_of_packs
+                item_detail['item_id'] = item.id
+                item_detail['item_name'] = item.name if line.type != 'premade_box' else item.box_size
 
-            elif line.type == 'premade_box':
-                box = self.get_item_detail_premade_box(line.item_id)
-                item_detail['item_id'] = box.id
-                item_detail['item_name'] = box.box_size
-                item_detail['per_price'] = ''
-                item_detail['quantity'] = box.num_of_boxes
+                if price_attr:
+                    item_detail['per_price'] = getattr(item, price_attr)
+                else:
+                    item_detail['per_price'] = ''
+
+                item_detail['quantity'] = getattr(item, quantity_attr)
 
             item_list.append(item_detail)
 
         return item_list
 
-    def get_item_detail_veggie(self, veggie_id):
-        result = db.session.query(Veggies).filter(
-            Veggies.id == veggie_id).first()
-        return result
-
-    def get_item_detail_premade_box(self, premade_box_id):
+    def get_item_detail(self, item_id):
         result = db.session.query(Item).filter(
-            Item.id == premade_box_id).first()
-
+            Item.id == item_id).first()
         return result
+
+    def calculate_item_price(self, price_per, quantity):
+        try:
+            price_per = float(price_per)
+            quantity = float(quantity)
+
+            item_price = price_per * quantity
+
+            item_price = round(item_price, 2)
+
+            return item_price
+        except:
+            return None
+
+    def add_item_to_order(self, item_id, item_price, order_id):
+        new_order_item = OrderItem(item_id, item_price, order_id)
+        db.session.add(new_order_item)
+        db.session.commit()

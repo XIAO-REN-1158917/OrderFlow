@@ -8,8 +8,8 @@
 </head>
 
 <body>
+    <a href="{{url_for('user.logout')}}">logout</a>
     <p>This is customer index page</p>
-
     <h2>Welcome,{{session.get('user_username',none)}}</h2>
     {% if not draft_order_details %}
     <a href="{{url_for('customer.newOrder')}}">New Order</a>
@@ -31,13 +31,49 @@
         <p id="veggie-price"></p>
 
         <!-- quantity of veggie -->
-        <div id="quantity-container" style="display:none;">
+        <div id="quantity-container">
             <label for="quantity" id="quantity-label">Quantity:</label>
             <input type="number" id="quantity" name="quantity" min="1" step="1" placeholder="Enter quantity" required>
         </div>
 
         <button type="submit" disabled id="submit-button">Add To Cart</button>
     </form>
+
+
+
+
+    <h2>Premade Box</h2>
+    <div id="box-description">
+        <p>Small Box = 3 items</p>
+        <p>Medium Box = 5 items</p>
+        <p>Large Box = 8 items</p>
+        <p>Every item = 1 kg OR 1 pack OR 1 unit (any type of veggie)</p>
+    </div>
+
+    <form method="post" action="{{url_for('customer.addPremadeBox')}}">
+        <select name="premade_box" id="premade-box-select" required onchange="showBoxOptions()">
+            <option value="" disabled selected>Premade Box</option>
+            {% for box in data['premade_boxes'] %}
+            <option value="{{ box.name }}" data-capacity="{{ box.capacity }}">{{ box.name }}</option>
+            {% endfor %}
+        </select>
+
+        <!-- Input for the number of boxes -->
+        <div>
+            <label for="box-quantity">Box Quantity:</label>
+            <input type="number" id="box-quantity" name="box_quantity" min="1" step="1" value="1" required>
+        </div>
+
+        <!-- items in premade boxes -->
+        <div id="box-veggies-container"></div>
+
+        <!-- Premade Box price -->
+        <p id="box-price"></p>
+
+        <!-- Submit button -->
+        <button type="submit" id="box-submit-button" disabled>Add To Cart</button>
+    </form>
+
 
     {% if draft_order_details %}
     <h2>Draft Order Details</h2>
@@ -62,7 +98,7 @@
                 {% if item['per_price'] %}
                 <td>{{item['per_price']}}</td>
                 {% else %}
-                <td> </td>
+                <td>-</td>
                 {% endif %}
                 <td>{{item['quantity']}}</td>
                 <td>{{item['item_price']}}</td>
@@ -74,28 +110,6 @@
 
 
 
-    <h2>Premade Box</h2>
-    <select name="premade_box" id="premade-box-select" onchange="showBoxOptions()">
-        <option value="" disabled selected>Premade Box</option>
-        {% for box in data['premade_boxes'] %}
-        <option value="{{ box.name }}" data-capacity="{{ box.capacity }}">{{ box.name }}</option>
-        {% endfor %}
-    </select>
-
-
-    <!-- Premade Box -->
-    <div id="box-description" style="display:none;">
-        <p>Small Box = 3 items</p>
-        <p>Medium Box = 5 items</p>
-        <p>Large Box = 8 items</p>
-        <p>Every item = 1 kg OR 1 pack OR 1 unit (any type of veggie)</p>
-    </div>
-
-    <!-- items in premade boxes -->
-    <div id="box-veggies-container"></div>
-
-    <!-- Premade Box price -->
-    <p id="box-price"></p>
 
     <script>
         function showPrice() {
@@ -106,7 +120,7 @@
 
             if (price && unit) {
                 document.getElementById("veggie-price").innerHTML = "Price: " + price + unit;
-                document.getElementById("quantity-container").style.display = "block";
+                //document.getElementById("quantity-container").style.display = "block";
                 document.getElementById("submit-button").disabled = false;
 
                 var quantityLabel = document.getElementById("quantity-label");
@@ -136,8 +150,6 @@
             var selectedOption = select.options[select.selectedIndex];
             var capacity = selectedOption.getAttribute("data-capacity");
 
-            document.getElementById("box-description").style.display = "block";
-
             var boxVeggiesContainer = document.getElementById("box-veggies-container");
             boxVeggiesContainer.innerHTML = "";
 
@@ -148,6 +160,7 @@
                 var selectBox = document.createElement("select");
                 selectBox.name = "veggie-option-" + (i + 1);
                 selectBox.id = "veggie-option-" + (i + 1);
+                selectBox.required = true;
                 selectBox.onchange = calculateBoxPrice;
 
                 var veggieSelect = document.getElementById("veggie-select");
@@ -170,6 +183,8 @@
                 boxVeggiesContainer.appendChild(selectBox);
                 boxVeggiesContainer.appendChild(document.createElement("br"));
             }
+
+            document.getElementById("box-submit-button").disabled = false;
         }
 
         function calculateBoxPrice() {
@@ -187,7 +202,8 @@
             }
 
             document.getElementById("box-price").innerHTML = "Premade Box Price: $" + totalPrice.toFixed(2);
-        }    
+        }
+
     </script>
 </body>
 

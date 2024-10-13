@@ -56,10 +56,3 @@ class CustomerDAO:
         draft_order = Order.query.filter_by(
             customer_id=customer_id, status='draft').first()
         return draft_order
-
-    def get_veggie_with_details(self, veggie_id):
-        veggie = Veggies.query.options(
-            joinedload(Veggies.weightedveggie),
-            joinedload(Veggies.packveggie),
-            joinedload(Veggies.unitveggie)
-        ).filter_by(id=veggie_id).first()

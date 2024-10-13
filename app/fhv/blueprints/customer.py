@@ -29,6 +29,13 @@ def index():
 
 @bp.route('/newOrder')
 def newOrder():
+    customer_id = session.get('user_id')
+    customer_dao = CustomerDAO()
+    order_dao = OrderDAO()
+    customer_service = CustomerService(customer_dao, order_dao)
+    new_order = customer_service.add_new_order_for_customer(customer_id)
+    print(new_order.id)
+    session['order_id'] = new_order.id
 
     return redirect(url_for('customer.index'))
 
@@ -36,6 +43,7 @@ def newOrder():
 @bp.route('/addItemVeggie', methods=['POST'])
 def addItemVeggie():
     customer_id = session.get('user_id')
+    order_id = session.get('order_id')
     veggie_name = request.form.get('veggies')
     quantity = float(request.form.get('quantity'))
 
@@ -43,6 +51,31 @@ def addItemVeggie():
     order_dao = OrderDAO()
     customer_service = CustomerService(customer_dao, order_dao)
 
-    customer_service.add_item_veggie(veggie_name, quantity)
+    customer_service.add_item_veggie(
+        veggie_name, quantity, order_id)
+
+    return redirect(url_for('customer.index'))
+
+
+@bp.route('/addPremadeBox', methods=['POST'])
+def addPremadeBox():
+    premade_box_name = request.form.get('premade_box')
+    box_quantity = request.form['box_quantity']
+    print(box_quantity)
+    if not premade_box_name:
+        print(1)
+        return redirect(url_for('customer.index'))
+
+    veggie_options = []
+
+    for i in range(1, 9):
+        veggie_option = request.form.get(f'veggie-option-{i}')
+        if veggie_option:
+            print(veggie_option)
+            veggie_options.append(veggie_option)
+
+    if len(veggie_options) < 3:
+        print(2)
+        return redirect(url_for('customer.index'))
 
     return redirect(url_for('customer.index'))

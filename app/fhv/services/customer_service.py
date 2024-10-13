@@ -1,6 +1,7 @@
+from fhv.exts import db
 from fhv.dao.customer_dao import CustomerDAO
 from fhv.dao.order_dao import OrderDAO
-from fhv.models import Veggies, PremadeBox, WeightedVeggie, PackVeggie, UnitVeggie
+from fhv.models import Veggies, PremadeBox, WeightedVeggie, PackVeggie, UnitVeggie, Order
 
 
 class CustomerService:
@@ -20,24 +21,29 @@ class CustomerService:
             'premade_boxes': premade_boxes,
         }
 
-    def add_item_veggie(self, veggie_name, quantity):
+    def add_item_veggie(self, veggie_name, quantity, order_id):
         veggie = self.customer_dao.get_veggie_by_name(veggie_name)
 
-        if isinstance(veggie, WeightedVeggie):
-            price = veggie.price_per_kilo
-            item_id = self.customer_dao.add_weighted_veggie(
-                name=veggie_name, price=price, weight=quantity)
+        veggie_type_map = {
+            WeightedVeggie: ('price_per_kilo', 'weight', 'add_weighted_veggie'),
+            PackVeggie: ('price_per_pack', 'num_of_packs', 'add_pack_veggie'),
+            UnitVeggie: ('price_per_unit', 'quantity', 'add_unit_veggie')
+        }
 
-        elif isinstance(veggie, PackVeggie):
-            price = veggie.price_per_pack
-            item_id = self.customer_dao.add_pack_veggie(
-                name=veggie_name, price=price, num_of_packs=quantity)
+        for veggie_type, (price_attr, quantity_attr, add_method_name) in veggie_type_map.items():
+            if isinstance(veggie, veggie_type):
+                price = getattr(veggie, price_attr)
+                item_price = self.order_dao.calculate_item_price(
+                    price, quantity)
+                add_method = getattr(self.customer_dao, add_method_name)
+                item_id = add_method(
+                    name=veggie_name, price=price, **{quantity_attr: quantity})
 
-        elif isinstance(veggie, UnitVeggie):
-            price = veggie.price_per_unit
-            item_id = self.customer_dao.add_unit_veggie(
-                name=veggie_name, price=price, quantity=quantity)
-        return item_id
+                self.order_dao.add_item_to_order(item_id, item_price, order_id)
+
+                return item_id, item_price
+
+        return None, None
 
     def get_draft_order_for_customer(self, customer_id):
         draft_order_details = {}
@@ -52,3 +58,9 @@ class CustomerService:
         else:
             draft_order_details = None
         return draft_order_details
+
+    def add_new_order_for_customer(self, customer_id):
+        order = Order(customer_id)
+        db.session.add(order)
+        db.session.commit()
+        return order
