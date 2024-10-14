@@ -40,6 +40,7 @@ class CustomerService:
                     name=veggie_name, price=price, **{quantity_attr: quantity})
 
                 self.order_dao.add_item_to_order(item_id, item_price, order_id)
+                self.order_dao.update_order_amount(order_id, item_price)
 
                 return item_id, item_price
 

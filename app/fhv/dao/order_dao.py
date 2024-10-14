@@ -1,3 +1,4 @@
+from decimal import Decimal
 from fhv.exts import db
 from sqlalchemy.orm import joinedload
 from fhv.models import Item, PremadeBoxContent, Veggies, PremadeBox, WeightedVeggie, PackVeggie, UnitVeggie, Order, OrderItem
@@ -73,4 +74,9 @@ class OrderDAO:
     def add_item_to_order(self, item_id, item_price, order_id):
         new_order_item = OrderItem(item_id, item_price, order_id)
         db.session.add(new_order_item)
+        db.session.commit()
+
+    def update_order_amount(self, order_id, price):
+        order = Order.query.filter_by(id=order_id).first()
+        order.order_price = order.order_price + Decimal(str(price))
         db.session.commit()

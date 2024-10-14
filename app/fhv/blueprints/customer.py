@@ -8,15 +8,16 @@ from fhv.exts import db
 
 bp = Blueprint('customer', __name__, url_prefix='/customer')
 
+# Instantiate DAO and service objects once
+customer_dao = CustomerDAO()
+order_dao = OrderDAO()
+customer_service = CustomerService(customer_dao, order_dao)
+
 
 @bp.route('/index')
 def index():
 
     customer_id = session.get('user_id')
-    customer_dao = CustomerDAO()
-    order_dao = OrderDAO()
-    customer_service = CustomerService(customer_dao, order_dao)
-
     draft_order_details = customer_service.get_draft_order_for_customer(
         customer_id)
 
@@ -30,9 +31,6 @@ def index():
 @bp.route('/newOrder')
 def newOrder():
     customer_id = session.get('user_id')
-    customer_dao = CustomerDAO()
-    order_dao = OrderDAO()
-    customer_service = CustomerService(customer_dao, order_dao)
     new_order = customer_service.add_new_order_for_customer(customer_id)
     print(new_order.id)
     session['order_id'] = new_order.id
@@ -46,10 +44,6 @@ def addItemVeggie():
     order_id = session.get('order_id')
     veggie_name = request.form.get('veggies')
     quantity = float(request.form.get('quantity'))
-
-    customer_dao = CustomerDAO()
-    order_dao = OrderDAO()
-    customer_service = CustomerService(customer_dao, order_dao)
 
     customer_service.add_item_veggie(
         veggie_name, quantity, order_id)
