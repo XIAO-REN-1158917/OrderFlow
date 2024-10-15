@@ -155,7 +155,7 @@ class Veggies(Item):
     __tablename__ = 'veggies'
     id = db.Column(db.Integer, db.ForeignKey('item.id'), primary_key=True)
     name = db.Column(db.String(50), nullable=False)
-
+    premade_box_id = db.Column(db.Integer, db.ForeignKey('premade_box.id'))
     __mapper_args__ = {
         'polymorphic_identity': 'veggies',
     }
@@ -220,17 +220,21 @@ class PremadeBox(Item):
                          'Large Box'), name='premade_box_size', nullable=False)
     num_of_boxes = db.Column(db.Integer, nullable=False)
 
-    content = []
+    # content = db.relationship('Veggie', backref='premade_box')
+    # content = db.relationship(
+    #     'Veggies', backref='premade_box', cascade="all, delete-orphan")
+    content = db.relationship('Veggies', backref='premade_box',
+                              cascade="all, delete-orphan", foreign_keys='Veggies.premade_box_id')
 
     __mapper_args__ = {
         'polymorphic_identity': 'premade_box',
     }
 
-    def __init__(self, box_size: str, num_of_boxes: int, content):
+    def __init__(self, box_size: str, num_of_boxes: int, content=None):
         super().__init__()
         self.box_size = box_size
         self.num_of_boxes = num_of_boxes
-        self.content = content
+        self.content = content if content is not None else []
 
 
 class OrderItem(db.Model):

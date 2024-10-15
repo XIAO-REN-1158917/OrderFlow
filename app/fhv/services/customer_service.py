@@ -75,6 +75,12 @@ class CustomerService:
                 return veggie['price']
         return None
 
+    def get_veggies_type(self, name):
+        veggies = self.get_veggies_list()
+        for veggie in veggies:
+            if veggie['name'] == name:
+                return veggie['type']
+
     def get_boxes_list(self):
         premade_boxes = [
             {'name': 'Small Box', 'capacity': 3},
@@ -84,33 +90,24 @@ class CustomerService:
         return premade_boxes
 
     def add_item_veggie(self, veggie_name, quantity, order_id):
-        veggie = self.customer_dao.get_veggie_by_name(veggie_name)
+        veggie = self.get_veggies_type(veggie_name)
+        price = self.get_veggies_price(veggie_name)
+        if veggie == 'weighted_veggie':
+            item = self.customer_dao.add_weighted_veggie(
+                veggie_name, price, quantity)
+        elif veggie == 'pack_veggie':
+            item = self.customer_dao.add_pack_veggie(
+                veggie_name, price, quantity)
+        elif veggie == 'unit_veggie':
+            item = self.customer_dao.add_unit_veggie(
+                veggie_name, price, quantity)
+        item_price = self.order_dao.calculate_item_price(price, quantity)
+        self.order_dao.add_item_to_order(item.id, item_price, order_id)
+        self.order_dao.update_order_amount(order_id, item_price)
 
-        veggie_type_map = {
-            WeightedVeggie: ('price_per_kilo', 'weight', 'add_weighted_veggie'),
-            PackVeggie: ('price_per_pack', 'num_of_packs', 'add_pack_veggie'),
-            UnitVeggie: ('price_per_unit', 'quantity', 'add_unit_veggie')
-        }
-
-        for veggie_type, (price_attr, quantity_attr, add_method_name) in veggie_type_map.items():
-            if isinstance(veggie, veggie_type):
-                price = getattr(veggie, price_attr)
-                item_price = self.order_dao.calculate_item_price(
-                    price, quantity)
-                add_method = getattr(self.customer_dao, add_method_name)
-                item_id = add_method(
-                    name=veggie_name, price=price, **{quantity_attr: quantity})
-                item_id = item_id.id
-
-                self.order_dao.add_item_to_order(item_id, item_price, order_id)
-                self.order_dao.update_order_amount(order_id, item_price)
-
-                return item_id, item_price
-
-        return None, None
-
-    def add_item_box(self, order_id, quantity, selected_items):
-        content = []
+    def add_item_box(self, order_id, quantity, selected_items, box_size):
+        new_box = self.customer_dao.add_premade_box(
+            box_size, quantity, None)
         for item in selected_items:
             if item['type'] == 'weighted_veggie':
                 veggie_in_box = self.customer_dao.add_weighted_veggie(
@@ -121,18 +118,11 @@ class CustomerService:
             elif item['type'] == 'unit_veggie':
                 veggie_in_box = self.customer_dao.add_unit_veggie(
                     item['name'], item['price'], 1)
-            content.append(veggie_in_box)
-        if len(content) == 3:
-            box_size = 'Small Box'
-        elif len(content) == 5:
-            box_size = 'Medium Box'
-        elif len(content) == 8:
-            box_size = 'Large Box'
-        new_box = self.customer_dao.add_premade_box(
-            box_size, quantity, content)
+            new_box.content.append(veggie_in_box)
+
         box_price = self.order_dao.get_box_price(new_box)
-        self.order_dao.add_item_to_order(new_box.id, box_price, order_id)
-        item_price = box_price*quantity
+        item_price = self.order_dao.calculate_item_price(box_price, quantity)
+        self.order_dao.add_item_to_order(new_box.id, item_price, order_id)
         self.order_dao.update_order_amount(order_id, item_price)
 
     def get_draft_order_for_customer(self, customer_id):

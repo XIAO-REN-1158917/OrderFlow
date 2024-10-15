@@ -76,6 +76,7 @@ def addItemVeggie():
     if not veggie_name:
         return redirect(url_for('customer.currentOrder'))
 
+    print(veggie_name, quantity, order_id)
     customer_service.add_item_veggie(
         veggie_name, quantity, order_id)
 
@@ -125,8 +126,14 @@ def addPremadeBox():
 
     if not selected_items:
         return redirect(url_for('customer.currentOrder'))
+    if len(selected_items) == 3:
+        box_size = 'Small Box'
+    elif len(selected_items) == 5:
+        box_size = 'Medium Box'
+    elif len(selected_items) == 8:
+        box_size = 'Large Box'
 
-    customer_service.add_item_box(order_id, quantity, selected_items)
+    customer_service.add_item_box(order_id, quantity, selected_items, box_size)
 
     return redirect(url_for('customer.currentOrder'))
 

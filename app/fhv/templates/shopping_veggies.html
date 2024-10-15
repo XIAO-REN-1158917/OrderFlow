@@ -95,7 +95,6 @@
         const selectedOption = select.options[select.selectedIndex];
         const price = selectedOption.getAttribute("data-price");
         const unit = selectedOption.getAttribute("data-unit");
-
         if (price && unit) {
             document.getElementById("veggie-price").innerHTML = `Price: $${price}${unit}`;
             document.getElementById("submit-button").disabled = false;
