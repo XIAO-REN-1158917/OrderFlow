@@ -13,11 +13,17 @@
         <div class="card-body">
             <p><strong>Order ID:</strong> {{ draft_order_details['order'].id }}</p>
             <p><strong>Order Date:</strong> {{ draft_order_details['order'].order_date }}</p>
-            <p><strong>Delivery:</strong> {{draft_order_details['order'].is_delivery}}</p>
-            <p><strong>Status:</strong> {{draft_order_details['order'].status}}</p>
-            <p><strong>Order Amount:</strong> ${{draft_order_details['order'].order_price}}</p>
+            <p><strong>Delivery:</strong> {% if draft_order_details['order'].is_delivery %}YES{%else%}NO{%endif%}</p>
+            <p><strong>Status:</strong> {{ draft_order_details['order'].status }}</p>
 
-            <table class="table table-bordered table-hover">
+            <p><strong>Balance:</strong> {{ session.get('balance') }}</p>
+            <p><strong>Address:</strong> {{ session.get('address') }}</p>
+
+            {% if session.get('credit_limit', none) %}
+            <p><strong>Credit Limit:</strong> {{ session.get('credit_limit') }}</p>
+            {% endif %}
+
+            <table class="table table-bordered table-hover mt-4">
                 <thead class="table-dark">
                     <tr>
                         <th>Name</th>
@@ -30,14 +36,14 @@
                 <tbody>
                     {% for item in draft_order_details['items'] %}
                     <tr>
-                        <td>{{item['item_name']}}</td>
-                        <td>${{item['per_price'] or '-'}}</td>
-                        <td>{{item['quantity']}}</td>
-                        <td>${{item['item_price']}}</td>
+                        <td>{{ item['item_name'] }}</td>
+                        <td>${{ item['per_price'] or '-' }}</td>
+                        <td>{{ item['quantity'] }}</td>
+                        <td>${{ item['item_price'] }}</td>
                         <td>
-                            <form action="{{url_for('customer.removeItemFromOrder')}}" method="post">
-                                <input type="hidden" name="item_id" value="{{item['item_id']}}">
-                                <input type="hidden" name="item_price" value="{{item['item_price']}}">
+                            <form action="{{ url_for('customer.removeItemFromOrder') }}" method="post">
+                                <input type="hidden" name="item_id" value="{{ item['item_id'] }}">
+                                <input type="hidden" name="item_price" value="{{ item['item_price'] }}">
                                 <button type="submit" class="btn btn-danger btn-sm">
                                     <i class="bi bi-trash"></i> Remove
                                 </button>
@@ -47,6 +53,33 @@
                     {% endfor %}
                 </tbody>
             </table>
+
+            <!-- Order Amount at the bottom right -->
+            <div class="d-flex justify-content-between align-items-center mt-4">
+                <div>
+                    <!-- Two buttons side by side -->
+                    <form action="{{ url_for('customer.placeOrder') }}" method="post" class="d-inline-block">
+                        <input type="hidden" name="order_id" value="{{ draft_order_details['order'].id }}">
+                        <button type="submit" class="btn btn-success btn-lg me-2">Place Order</button>
+                    </form>
+                    {% if session.get('deliverable') %}
+                    {% if not draft_order_details['order'].is_delivery %}
+                    <form action="{{url_for('customer.toggleDelivery')}}" method="post" class="d-inline-block">
+                        <button type="submit" class="btn btn-success btn-lg">Deliver($10)</button>
+                    </form>
+                    {% else %}
+                    <form action="{{url_for('customer.toggleDelivery')}}" method="post" class="d-inline-block">
+                        <button type="submit" class="btn btn-success btn-lg">Pick Up</button>
+                    </form>
+                    {% endif %}
+                    {%else%}
+                    <button disabled class="btn btn-success btn-lg">Beyond delivery range</button>
+                    {% endif %}
+                </div>
+
+                <!-- Order Amount on the right -->
+                <p class="fs-4 mb-0"><strong>Order Amount:</strong> ${{ draft_order_details['order'].order_price }}</p>
+            </div>
         </div>
     </div>
     {% endif %}

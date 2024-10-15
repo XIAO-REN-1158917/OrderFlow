@@ -147,6 +147,19 @@ def removeItemFromOrder():
     return redirect(url_for('customer.currentOrder'))
 
 
+@bp.route('/placeOrder', methods=['POST'])
+def placeOrder():
+
+    pass
+
+
+@bp.route('/toggleDelivery', methods=['POST'])
+def toggleDelivery():
+    order_id = session.get('order_id')
+    customer_service.toggle_delivery(order_id)
+    return redirect(url_for('customer.currentOrder'))
+
+
 @bp.route('/myProfile/<int:user_id>')
 def myProfile(user_id):
     return render_template('myProfile.html')

@@ -95,3 +95,14 @@ class OrderDAO:
         item_type = db.session.query(Item.type).filter(
             Item.id == item_id).scalar()
         return item_type
+
+    def get_order_by_id(self, order_id):
+        order = Order.query.filter_by(id=order_id).first()
+        return order
+
+    def toggle_order_delivery_status(self, order):
+        if order.is_delivery:
+            order.is_delivery = False
+        else:
+            order.is_delivery = True
+        db.session.commit()

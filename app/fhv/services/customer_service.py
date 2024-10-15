@@ -159,3 +159,11 @@ class CustomerService:
         db.session.commit()
         item_price = round(-float(item_price), 2)
         self.order_dao.update_order_amount(order_id, item_price)
+
+    def toggle_delivery(self, order_id):
+        order = self.order_dao.get_order_by_id(order_id)
+        price = order.delivery_fee
+        if order.is_delivery:
+            price = round(-float(price), 2)
+        self.order_dao.update_order_amount(order_id, price)
+        self.order_dao.toggle_order_delivery_status(order)
