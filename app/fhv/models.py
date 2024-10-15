@@ -27,9 +27,6 @@ class Person(db.Model):
     def check_password(self, password: str) -> bool:
         return self.password == password
 
-    def __repr__(self):
-        return f"<Person(id={self.id}, firstname={self.firstname}, lastname={self.lastname}, username={self.username})>"
-
 
 class Staff(Person):
     __tablename__ = 'staff'
@@ -43,9 +40,6 @@ class Staff(Person):
     def __init__(self, firstname: str, lastname: str, username: str, password: str, department: str):
         super().__init__(firstname, lastname, username, password)
         self.department = department
-
-    def __repr__(self):
-        return f"<Staff(id={self.id}, firstname={self.firstname}, lastname={self.lastname}, department={self.department})>"
 
 
 class Customer(Person):
@@ -67,9 +61,6 @@ class Customer(Person):
         super().__init__(firstname, lastname, username, password)
         self.address = address
 
-    def __repr__(self):
-        return f"<Customer(id={self.id}, firstname={self.firstname}, lastname={self.lastname}, balance={self.balance})>"
-
 
 class CorporateCustomer(Customer):
     __tablename__ = 'corporate_customer'
@@ -83,9 +74,6 @@ class CorporateCustomer(Customer):
     def __init__(self, firstname: str, lastname: str, username: str, password: str, address: str, credit_limit: float):
         super().__init__(firstname, lastname, username, password, address)
         self.credit_limit = credit_limit
-
-    def __repr__(self):
-        return f"<CorporateCustomer(id={self.id}, firstname={self.firstname}, lastname={self.lastname}, balance={self.balance}, credit_limit={self.credit_limit})>"
 
 
 class Payment(db.Model):
@@ -107,9 +95,6 @@ class Payment(db.Model):
         self.amount = amount
         self.customer_id = customer_id
 
-    def __repr__(self):
-        return f"<Payment(id={self.id}, amount={self.amount}, created_at={self.created_at}, customer_id={self.customer_id})>"
-
 
 class PayByCredit(Payment):
     __tablename__ = 'pay_by_credit'
@@ -129,10 +114,6 @@ class PayByCredit(Payment):
         self.cardholder = cardholder
         self.expiry = expiry
         self.cvv = cvv
-
-    def __repr__(self):
-        return (f"<PayByCredit(id={self.id}, amount={self.amount}, created_at={self.created_at}, "
-                f"card_number={self.card_number}, cardholder={self.cardholder}, expiry={self.expiry}, customer_id={self.customer_id})>")
 
 
 class PayByDebit(Payment):
@@ -166,7 +147,8 @@ class Item(db.Model):
         'polymorphic_on': type,
     }
 
-    order_items = db.relationship('OrderItem', back_populates='item')
+    order_items = db.relationship(
+        'OrderItem', back_populates='item', cascade='all, delete-orphan')
 
 
 class Veggies(Item):
@@ -178,15 +160,9 @@ class Veggies(Item):
         'polymorphic_identity': 'veggies',
     }
 
-    contents = db.relationship(
-        'PremadeBoxContent', back_populates='veggies', cascade='all, delete-orphan')
-
     def __init__(self, name: str):
         super().__init__()
         self.name = name
-
-    def __repr__(self):
-        return f"<Veggies(id={self.id}, name='{self.name}')>"
 
 
 class WeightedVeggie(Veggies):
@@ -240,44 +216,21 @@ class UnitVeggie(Veggies):
 class PremadeBox(Item):
     __tablename__ = 'premade_box'
     id = db.Column(db.Integer, db.ForeignKey('item.id'), primary_key=True)
-    box_size = db.Column(db.Enum('small', 'medium', 'large'),
-                         name='premade_box_size', nullable=False)
+    box_size = db.Column(db.Enum('Small Box', 'Medium Box',
+                         'Large Box'), name='premade_box_size', nullable=False)
     num_of_boxes = db.Column(db.Integer, nullable=False)
+
+    content = []
 
     __mapper_args__ = {
         'polymorphic_identity': 'premade_box',
     }
 
-    contents = db.relationship(
-        'PremadeBoxContent', back_populates='premade_box', cascade='all, delete-orphan')
-
-    def __init__(self, box_size: str, num_of_boxes: int):
+    def __init__(self, box_size: str, num_of_boxes: int, content):
         super().__init__()
         self.box_size = box_size
         self.num_of_boxes = num_of_boxes
-
-    def __repr__(self):
-        return f"<PremadeBox(id={self.id}, box_size='{self.box_size}', num_box='{self.num_of_boxes}')>"
-
-
-class PremadeBoxContent(db.Model):
-    __tablename__ = 'premade_box_content'
-
-    id = db.Column(db.Integer, primary_key=True)
-    premade_box_id = db.Column(db.Integer, db.ForeignKey(
-        'premade_box.id'), nullable=False)
-    veggies_id = db.Column(db.Integer, db.ForeignKey(
-        'veggies.id'), nullable=False)
-
-    premade_box = db.relationship('PremadeBox', back_populates='contents')
-    veggies = db.relationship('Veggies', back_populates='contents')
-
-    def __init__(self, premade_box_id: int, veggies_id: int):
-        self.premade_box_id = premade_box_id
-        self.veggies_id = veggies_id
-
-    def __repr__(self):
-        return f"<PremadeBoxContent(id={self.id}, premade_box_id={self.premade_box_id}, veggies_id={self.veggies_id})>"
+        self.content = content
 
 
 class OrderItem(db.Model):
@@ -285,7 +238,7 @@ class OrderItem(db.Model):
     id = db.Column(db.Integer, primary_key=True)
 
     item_id = db.Column(db.Integer, db.ForeignKey(
-        'item.id'), nullable=False)
+        'item.id', ondelete='CASCADE'), nullable=False)
     item_price = db.Column(Numeric(10, 2), nullable=False)
     item = db.relationship('Item', back_populates='order_items')
 

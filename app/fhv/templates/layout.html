@@ -145,7 +145,6 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </head>
 
-
 <body>
     <!-- Navbar -->
     <header class="border-bottom border-body navbar-expand-lg sticky-top z-1000 shadow">
@@ -154,19 +153,54 @@
                 <a class="navbar-brand" href="#">
                     <span>Fresh Harvest Veggies</span>
                 </a>
+                <div class="d-flex align-items-center ms-auto gap-3">
+                    <!-- Search Bar -->
+                    <ul class="navbar-nav d-flex align-items-center">
+                        {% if session.get('user_username') %}
+                        <li class="nav-item d-flex align-items-center">
+                            <a class="nav-link" href="{{url_for('customer.myProfile',user_id=session.get('user_id'))}}"
+                                title="{{ session.get('user_username')}}'s profile">
+                                <p>{{ session.get('user_username')}}</p>
+                            </a>
+                        </li>
+                        <li class="nav-item d-flex align-items-center">
+                            <a class="btn btn-outline-primary ms-2" href="{{ url_for('user.logout') }}">Logout</a>
+                        </li>
+                        {% else %}
+                        <li class="nav-item d-flex align-items-center">
+                            <a class="btn btn-outline-primary ms-2" href="{{ url_for('user.login') }}">Login</a>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </div>
             </div>
         </nav>
     </header>
 
     <!-- Main layout with sidebar and content -->
     <div class="content-wrapper">
-        <form action="/login" method="post">
-            <label for="username">Username</label>
-            <input type="text" name="username" id="username">
-            <label for="password">Password</label>
-            <input type="text" name="password" id="password">
-            <button type="submit">Longin</button>
-        </form>
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <a href="{{url_for('customer.index')}}">
+                <h4 class="mb-4">Welcome,{{session.get('user_username', none)}}</h4>
+            </a>
+            <a href="{{url_for('customer.currentOrder')}}">Current Order</a>
+            <a href="{{url_for('customer.shoppingVeggie')}}">Shopping Veggies</a>
+            <a href="{{url_for('customer.shoppingBox')}}">Shopping Premade Box</a>
+
+
+            <a href="#">My Orders</a>
+            <a href="#">My Payment</a>
+            <a href="{{url_for('customer.myProfile',user_id=session.get('user_id'))}}">My Profile</a>
+
+        </div>
+
+
+
+        <!-- Main content -->
+        <div class="content">
+            {% block content %}{% endblock %}
+        </div>
     </div>
 
     <!-- Footer -->

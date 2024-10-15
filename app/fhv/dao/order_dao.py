@@ -1,7 +1,7 @@
 from decimal import Decimal
 from fhv.exts import db
 from sqlalchemy.orm import joinedload
-from fhv.models import Item, PremadeBoxContent, Veggies, PremadeBox, WeightedVeggie, PackVeggie, UnitVeggie, Order, OrderItem
+from fhv.models import Item, Veggies, PremadeBox, WeightedVeggie, PackVeggie, UnitVeggie, Order, OrderItem
 from sqlalchemy.orm import aliased
 
 
@@ -41,13 +41,12 @@ class OrderDAO:
 
                 item_detail['item_id'] = item.id
                 item_detail['item_name'] = item.name if line.type != 'premade_box' else item.box_size
-
+                item_detail['quantity'] = getattr(item, quantity_attr)
                 if price_attr:
                     item_detail['per_price'] = getattr(item, price_attr)
                 else:
-                    item_detail['per_price'] = ''
-
-                item_detail['quantity'] = getattr(item, quantity_attr)
+                    item_detail['per_price'] = line.item_price if item_detail['quantity'] == 1 else line.item_price / \
+                        item_detail['quantity']
 
             item_list.append(item_detail)
 
@@ -80,3 +79,19 @@ class OrderDAO:
         order = Order.query.filter_by(id=order_id).first()
         order.order_price = order.order_price + Decimal(str(price))
         db.session.commit()
+
+    def get_box_price(self, box):
+        box_price = Decimal('0.00')
+        for veggie in box.content:
+            if isinstance(veggie, WeightedVeggie):
+                box_price += veggie.price_per_kilo * veggie.weight
+            elif isinstance(veggie, PackVeggie):
+                box_price += veggie.price_per_pack * veggie.num_of_packs
+            elif isinstance(veggie, UnitVeggie):
+                box_price += veggie.price_per_unit * veggie.quantity
+        return float(box_price)
+
+    def get_type_by_item_id(self, item_id):
+        item_type = db.session.query(Item.type).filter(
+            Item.id == item_id).scalar()
+        return item_type

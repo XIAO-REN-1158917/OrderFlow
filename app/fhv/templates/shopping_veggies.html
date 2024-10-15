@@ -1,0 +1,135 @@
+{% extends "layout.html" %}
+{% block content %}
+
+<main class="container mt-5">
+
+    {% if session.get('need_new_order') %}
+    <a href="{{url_for('customer.newOrder')}}" class="btn btn-primary btn-lg">Please Create a New Order</a>
+    {% else %}
+
+    <!-- Veggie Selection Form -->
+    <form method="post" action="{{url_for('customer.addItemVeggie')}}" onsubmit="return validateForm()" class="mb-5">
+        <h2 class="mb-4">Select Veggies</h2>
+
+        <!-- Veggie selection row -->
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <label for="weighted-veggie-select" class="form-label">Weighted Veggies</label>
+                <select class="form-select" name="weighted_veggie" id="weighted-veggie-select"
+                    onchange="handleVeggieSelection('weighted')">
+                    <option value="" disabled selected></option>
+                    {% for veggie in veggies if veggie.type == 'weighted_veggie' %}
+                    <option value="{{ veggie.name }}" data-price="{{ veggie.price }}" data-unit="{{ veggie.unit }}">
+                        {{ veggie.name }} - ${{ veggie.price }}{{ veggie.unit }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label for="pack-veggie-select" class="form-label">Pack Veggies</label>
+                <select class="form-select" name="pack_veggie" id="pack-veggie-select"
+                    onchange="handleVeggieSelection('pack')">
+                    <option value="" disabled selected></option>
+                    {% for veggie in veggies if veggie.type == 'pack_veggie' %}
+                    <option value="{{ veggie.name }}" data-price="{{ veggie.price }}" data-unit="{{ veggie.unit }}">
+                        {{ veggie.name }} - ${{ veggie.price }}{{ veggie.unit }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label for="unit-veggie-select" class="form-label">Unit Veggies</label>
+                <select class="form-select" name="unit_veggie" id="unit-veggie-select"
+                    onchange="handleVeggieSelection('unit')">
+                    <option value="" disabled selected></option>
+                    {% for veggie in veggies if veggie.type == 'unit_veggie' %}
+                    <option value="{{ veggie.name }}" data-price="{{ veggie.price }}" data-unit="{{ veggie.unit }}">
+                        {{ veggie.name }} - ${{ veggie.price }}{{ veggie.unit }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+
+        <!-- Quantity and Price row -->
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <label for="quantity" id="quantity-label" class="form-label">Quantity:</label>
+                <input type="number" class="form-control" id="quantity" name="quantity" min="1" step="1"
+                    placeholder="Enter quantity" required>
+            </div>
+            <div class="col-md-6 d-flex align-items-center">
+                <p id="veggie-price" class="mb-0 fs-5 fw-bold"></p>
+            </div>
+        </div>
+
+        <!-- Submit button -->
+        <div class="row">
+            <div class="col text-center">
+                <button type="submit" class="btn btn-primary btn-lg" disabled id="submit-button">Add To Order</button>
+            </div>
+        </div>
+    </form>
+    {% endif %}
+
+</main>
+
+<script>
+    function handleVeggieSelection(type) {
+        const weightedSelect = document.getElementById("weighted-veggie-select");
+        const packSelect = document.getElementById("pack-veggie-select");
+        const unitSelect = document.getElementById("unit-veggie-select");
+
+        if (type === 'weighted') {
+            packSelect.value = "";
+            unitSelect.value = "";
+        } else if (type === 'pack') {
+            weightedSelect.value = "";
+            unitSelect.value = "";
+        } else if (type === 'unit') {
+            weightedSelect.value = "";
+            packSelect.value = "";
+        }
+
+        const select = document.getElementById(`${type}-veggie-select`);
+        const selectedOption = select.options[select.selectedIndex];
+        const price = selectedOption.getAttribute("data-price");
+        const unit = selectedOption.getAttribute("data-unit");
+
+        if (price && unit) {
+            document.getElementById("veggie-price").innerHTML = `Price: $${price}${unit}`;
+            document.getElementById("submit-button").disabled = false;
+
+            const quantityLabel = document.getElementById("quantity-label");
+            const quantityInput = document.getElementById("quantity");
+
+            if (unit === "/Kg") {
+                quantityLabel.innerHTML = "Quantity: (Keep one decimal places)";
+                quantityInput.min = "0.1";
+                quantityInput.step = "0.1";
+                quantityInput.placeholder = "Enter quantity (e.g., 1.5)";
+            } else {
+                quantityLabel.innerHTML = "Quantity: (Keep integers)";
+                quantityInput.min = "1";
+                quantityInput.step = "1";
+                quantityInput.placeholder = "Enter quantity (e.g., 1)";
+            }
+        }
+    }
+
+    function validateForm() {
+        const weightedVeggie = document.getElementById("weighted-veggie-select").value;
+        const packVeggie = document.getElementById("pack-veggie-select").value;
+        const unitVeggie = document.getElementById("unit-veggie-select").value;
+        const quantity = document.getElementById("quantity").value;
+
+        if ((weightedVeggie || packVeggie || unitVeggie) && quantity > 0) {
+            return true;
+        } else {
+            alert("Please select a veggie and enter a valid quantity.");
+            return false;
+        }
+    }
+</script>
+
+{% endblock %}

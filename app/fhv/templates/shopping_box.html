@@ -1,0 +1,259 @@
+{% extends "layout.html" %}
+{% block content %}
+<style>
+    #box-description {
+        font-size: 0.875rem;
+        text-align: right;
+        color: #6c757d;
+        margin-bottom: 20px;
+    }
+
+    .box-row {
+        margin-bottom: 30px;
+    }
+
+    select.form-select {
+        width: 85%;
+        display: inline-block;
+    }
+
+    .form-label {
+        font-weight: bold;
+    }
+
+    input[type="number"] {
+        width: 100%;
+        padding: 0.375rem 0.75rem;
+        border: 1px solid #ced4da;
+        border-radius: 0.25rem;
+    }
+</style>
+
+<main class="container">
+    <!-- Premade Box Selection -->
+    <form method="post" action="{{ url_for('customer.addPremadeBox') }}" onsubmit="return validateBoxForm()">
+        <h2>Premade Box</h2>
+
+        <div id="box-description">
+            Every item = 1 kilo or 1 pack or 1 unit (any type of veggie)<br>
+            Small = 3 items<br>
+            Medium = 5 items<br>
+            Large = 8 items
+        </div>
+
+        <!-- Premade Box Selection Row -->
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <label for="premade-box-select" class="form-label">Select Box Size:</label>
+                <select class="form-select" name="premade_box" id="premade-box-select" required
+                    onchange="generateBoxRows()">
+                    <option value="" disabled selected></option>
+                    {% for box in data['premade_boxes'] %}
+                    <option value="{{ box.name }}" data-capacity="{{ box.capacity }}">{{ box.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="col-md-2">
+                <label for="quantity" class="form-label">Quantity:</label>
+                <input type="number" id="quantity" name="quantity" value="1" min="1" step="1" required>
+            </div>
+        </div>
+
+        <!-- Dynamic Box Rows Container -->
+        <div id="box-rows-container"></div>
+
+        <!-- Total Price Display -->
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <p id="total-price" class="fw-bold">Total Price: $0.00</p>
+            </div>
+        </div>
+
+        <!-- Submit Button -->
+        <div class="row">
+            <div class="col text-center">
+                <button type="submit" class="btn btn-primary" disabled id="box-submit-button">Add To Order</button>
+            </div>
+        </div>
+    </form>
+</main>
+
+<script>
+    const veggies = JSON.parse('{{ data["veggies"] | tojson | safe }}');
+    let totalPrice = 0;
+
+    function generateBoxRows() {
+        const premadeBoxSelect = document.getElementById("premade-box-select");
+        const selectedBox = premadeBoxSelect.options[premadeBoxSelect.selectedIndex];
+        const capacity = parseInt(selectedBox.getAttribute("data-capacity"));
+        const boxRowsContainer = document.getElementById("box-rows-container");
+        boxRowsContainer.innerHTML = "";
+        totalPrice = 0;
+        document.getElementById("total-price").innerText = "Total Price: $0.00";
+        document.getElementById("box-submit-button").disabled = true;
+
+        for (let i = 1; i <= capacity; i++) {
+            const row = document.createElement("div");
+            row.className = "row mb-3 box-row";
+            row.setAttribute("data-row-index", i);
+
+            const weightedCol = document.createElement("div");
+            weightedCol.className = "col-md-4";
+            const weightedLabel = document.createElement("label");
+            weightedLabel.setAttribute("for", `weighted-veggie-select-${i}`);
+            weightedLabel.className = "form-label";
+            weightedLabel.innerText = `Weighted Veggie:`;
+            const weightedSelect = document.createElement("select");
+            weightedSelect.className = "form-select veggie-select";
+            weightedSelect.name = `weighted_veggie_${i}`;
+            weightedSelect.id = `weighted-veggie-select-${i}`;
+            weightedSelect.setAttribute("data-type", "weighted");
+            weightedSelect.onchange = () => handleVeggieSelection(i, 'weighted');
+            weightedSelect.innerHTML = `<option value="" disabled selected></option>`;
+            veggies.filter(v => v.type === 'weighted_veggie').forEach(v => {
+                weightedSelect.innerHTML += `<option value="${v.name}" data-price="${v.price}" data-unit="${v.unit}">${v.name} - $${v.price}${v.unit}</option>`;
+            });
+
+            if (i === 1) {
+                weightedCol.appendChild(weightedLabel);
+            }
+            weightedCol.appendChild(weightedSelect);
+
+            const packCol = document.createElement("div");
+            packCol.className = "col-md-4";
+            const packLabel = document.createElement("label");
+            packLabel.setAttribute("for", `pack-veggie-select-${i}`);
+            packLabel.className = "form-label";
+            packLabel.innerText = `Pack Veggie:`;
+            const packSelect = document.createElement("select");
+            packSelect.className = "form-select veggie-select";
+            packSelect.name = `pack_veggie_${i}`;
+            packSelect.id = `pack-veggie-select-${i}`;
+            packSelect.setAttribute("data-type", "pack");
+            packSelect.onchange = () => handleVeggieSelection(i, 'pack');
+            packSelect.innerHTML = `<option value="" disabled selected></option>`;
+            veggies.filter(v => v.type === 'pack_veggie').forEach(v => {
+                packSelect.innerHTML += `<option value="${v.name}" data-price="${v.price}" data-unit="${v.unit}">${v.name} - $${v.price}${v.unit}</option>`;
+            });
+
+            if (i === 1) {
+                packCol.appendChild(packLabel);
+            }
+            packCol.appendChild(packSelect);
+
+            const unitCol = document.createElement("div");
+            unitCol.className = "col-md-4";
+            const unitLabel = document.createElement("label");
+            unitLabel.setAttribute("for", `unit-veggie-select-${i}`);
+            unitLabel.className = "form-label";
+            unitLabel.innerText = `Unit Veggie:`;
+            const unitSelect = document.createElement("select");
+            unitSelect.className = "form-select veggie-select";
+            unitSelect.name = `unit_veggie_${i}`;
+            unitSelect.id = `unit-veggie-select-${i}`;
+            unitSelect.setAttribute("data-type", "unit");
+            unitSelect.onchange = () => handleVeggieSelection(i, 'unit');
+            unitSelect.innerHTML = `<option value="" disabled selected></option>`;
+            veggies.filter(v => v.type === 'unit_veggie').forEach(v => {
+                unitSelect.innerHTML += `<option value="${v.name}" data-price="${v.price}" data-unit="${v.unit}">${v.name} - $${v.price}${v.unit}</option>`;
+            });
+
+            if (i === 1) {
+                unitCol.appendChild(unitLabel);
+            }
+            unitCol.appendChild(unitSelect);
+
+            row.appendChild(weightedCol);
+            row.appendChild(packCol);
+            row.appendChild(unitCol);
+
+            boxRowsContainer.appendChild(row);
+        }
+    }
+
+    function handleVeggieSelection(rowIndex, type) {
+        const row = document.querySelector(`.box-row[data-row-index="${rowIndex}"]`);
+        const selects = row.querySelectorAll('.veggie-select');
+        let selectedCount = 0;
+        let rowPrice = 0;
+
+        // Ensure only one selection per row
+        selects.forEach(select => {
+            if (select.getAttribute('data-type') !== type) {
+                // If another select has a value, reset it
+                select.value = "";
+            }
+            if (select.value !== "") {
+                selectedCount += 1;
+                const price = parseFloat(select.options[select.selectedIndex].getAttribute('data-price'));
+                rowPrice += price;
+            }
+        });
+
+        if (selectedCount === 1) {
+            // Update total price when a selection is made
+            updateTotalPrice();
+        }
+
+        // Enable or disable submit button based on selections
+        checkAllSelections();
+    }
+
+
+    function updateTotalPrice() {
+        totalPrice = 0;
+        const allRows = document.querySelectorAll('.box-row');
+        allRows.forEach(row => {
+            const selects = row.querySelectorAll('.veggie-select');
+            selects.forEach(select => {
+                if (select.value !== "") {
+                    const price = parseFloat(select.options[select.selectedIndex].getAttribute('data-price'));
+                    totalPrice += price;
+                }
+            });
+        });
+        document.getElementById("total-price").innerText = `Total Price: $${totalPrice.toFixed(2)}`;
+    }
+
+    function checkAllSelections() {
+        const allRows = document.querySelectorAll('.box-row');
+        let allSelected = true;
+
+        allRows.forEach(row => {
+            const selects = row.querySelectorAll('.veggie-select');
+            let rowHasSelection = false;
+            selects.forEach(select => {
+                if (select.value !== "") {
+                    rowHasSelection = true;
+                }
+            });
+            if (!rowHasSelection) {
+                allSelected = false;
+            }
+        });
+
+        // Enable submit button only if all rows have a selection
+        document.getElementById("box-submit-button").disabled = !allSelected;
+    }
+
+    function validateBoxForm() {
+        const allRows = document.querySelectorAll('.box-row');
+        for (let row of allRows) {
+            const selects = row.querySelectorAll('.veggie-select');
+            let selectedCount = 0;
+            selects.forEach(select => {
+                if (select.value !== "") {
+                    selectedCount += 1;
+                }
+            });
+            if (selectedCount !== 1) {
+                alert("Please select exactly one veggie for each row.");
+                return false;
+            }
+        }
+        return true;
+    }
+</script>
+
+{% endblock %}

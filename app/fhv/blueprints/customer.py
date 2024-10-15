@@ -16,16 +16,40 @@ customer_service = CustomerService(customer_dao, order_dao)
 
 @bp.route('/index')
 def index():
-
     customer_id = session.get('user_id')
     draft_order_details = customer_service.get_draft_order_for_customer(
         customer_id)
+    if not draft_order_details:
+        session['need_new_order'] = True
+        session['order_id'] = None
+    else:
+        session['need_new_order'] = False
+        session['order_id'] = draft_order_details['order'].id
 
-    data = customer_service.get_product_list()
+    return render_template('customer_index.html')
 
-    return render_template('customerIndex.html',
-                           data=data,
-                           draft_order_details=draft_order_details)
+
+@bp.route('/shoppingVeggie', methods=['GET'])
+def shoppingVeggie():
+    veggies = customer_service.get_veggies_list()
+    return render_template('shopping_veggies.html', veggies=veggies)
+
+
+@bp.route('/shoppingBox', methods=['GET'])
+def shoppingBox():
+    data = {
+        'veggies': customer_service.get_veggies_list(),
+        'premade_boxes': customer_service.get_boxes_list(),
+    }
+    return render_template('shopping_box.html', data=data)
+
+
+@bp.route('/currentOrder', methods=['GET'])
+def currentOrder():
+    customer_id = session.get('user_id')
+    draft_order_details = customer_service.get_draft_order_for_customer(
+        customer_id)
+    return render_template('current_order.html', draft_order_details=draft_order_details)
 
 
 @bp.route('/newOrder')
@@ -42,34 +66,80 @@ def newOrder():
 def addItemVeggie():
     customer_id = session.get('user_id')
     order_id = session.get('order_id')
-    veggie_name = request.form.get('veggies')
+
+    weighted_veggie = request.form.get('weighted_veggie')
+    pack_veggie = request.form.get('pack_veggie')
+    unit_veggie = request.form.get('unit_veggie')
+
+    veggie_name = weighted_veggie or pack_veggie or unit_veggie
     quantity = float(request.form.get('quantity'))
+    if not veggie_name:
+        return redirect(url_for('customer.currentOrder'))
 
     customer_service.add_item_veggie(
         veggie_name, quantity, order_id)
 
-    return redirect(url_for('customer.index'))
+    return redirect(url_for('customer.currentOrder'))
 
 
 @bp.route('/addPremadeBox', methods=['POST'])
 def addPremadeBox():
-    premade_box_name = request.form.get('premade_box')
-    box_quantity = request.form['box_quantity']
-    print(box_quantity)
-    if not premade_box_name:
-        print(1)
-        return redirect(url_for('customer.index'))
+    order_id = session.get('order_id')
+    quantity = int(request.form.get('quantity', 1))
 
-    veggie_options = []
+    max_rows = 8
+    selected_items = []
 
-    for i in range(1, 9):
-        veggie_option = request.form.get(f'veggie-option-{i}')
-        if veggie_option:
-            print(veggie_option)
-            veggie_options.append(veggie_option)
+    for i in range(1, max_rows + 1):
+        weighted_veggie = request.form.get(f'weighted_veggie_{i}')
+        pack_veggie = request.form.get(f'pack_veggie_{i}')
+        unit_veggie = request.form.get(f'unit_veggie_{i}')
 
-    if len(veggie_options) < 3:
-        print(2)
-        return redirect(url_for('customer.index'))
+        if weighted_veggie:
+            price = customer_service.get_veggies_price(weighted_veggie)
+            weighted_price = float(price)
+            veggie_dict = {
+                'type': 'weighted_veggie',
+                'name': weighted_veggie,
+                'price': weighted_price,
+            }
+            selected_items.append(veggie_dict)
+        elif pack_veggie:
+            price = customer_service.get_veggies_price(pack_veggie)
+            pack_price = float(price)
+            veggie_dict = {
+                'type': 'pack_veggie',
+                'name': pack_veggie,
+                'price': pack_price,
+            }
+            selected_items.append(veggie_dict)
+        elif unit_veggie:
+            price = customer_service.get_veggies_price(unit_veggie)
+            unit_price = float(price)
+            veggie_dict = {
+                'type': 'unit_veggie',
+                'name': unit_veggie,
+                'price': unit_price,
+            }
+            selected_items.append(veggie_dict)
 
-    return redirect(url_for('customer.index'))
+    if not selected_items:
+        return redirect(url_for('customer.currentOrder'))
+
+    customer_service.add_item_box(order_id, quantity, selected_items)
+
+    return redirect(url_for('customer.currentOrder'))
+
+
+@bp.route('/removeItemFromOrder', methods=['POST'])
+def removeItemFromOrder():
+    item_id = request.form['item_id']
+    item_price = request.form['item_price']
+    order_id = session.get('order_id')
+    customer_service.remove_item_form_order(order_id, item_id, item_price)
+    return redirect(url_for('customer.currentOrder'))
+
+
+@bp.route('/myProfile/<int:user_id>')
+def myProfile(user_id):
+    return render_template('myProfile.html')

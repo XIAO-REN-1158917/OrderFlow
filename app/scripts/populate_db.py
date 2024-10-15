@@ -56,21 +56,23 @@ def populate_data():
         # medium = 5 items
         # large = 8 items
 
-        premade_box1 = PremadeBox(box_size="small", num_of_boxes=1)
         # order3 ccustomer9 small
         weightedVeggie1 = WeightedVeggie(
             name="Carrot(wei)", price_per_kilo=2.50, weight=1)
         packVeggie1 = PackVeggie(
             name="Spinach(pack)", price_per_pack=3.5, num_of_packs=2)
 
-        premade_box2 = PremadeBox(box_size="medium", num_of_boxes=1)
+        premade_box1 = PremadeBox(
+            box_size="Small Box", num_of_boxes=1, content=[weightedVeggie1, packVeggie1])
+
         # order3 ccustomer9 medium
         weightedVeggie2 = WeightedVeggie(
             name="Tomato(wei)", price_per_kilo=5.50, weight=2)
         packVeggie2 = PackVeggie(
             name="Onion(pack)", price_per_pack=6.5, num_of_packs=3)
+        premade_box2 = PremadeBox(
+            box_size="Medium Box", num_of_boxes=1, content=[weightedVeggie2, packVeggie2])
 
-        premade_box3 = PremadeBox(box_size="large", num_of_boxes=1)
         # order3 ccustomer9 large 19.2 5.8 7.8
         packVeggie3 = PackVeggie(
             name="Zucchini(pack)", price_per_pack=4.8, num_of_packs=4)
@@ -78,6 +80,8 @@ def populate_data():
             name="Cucumber(unit)", price_per_unit=2.9, quantity=2)
         unitVeggie2 = UnitVeggie(
             name="Lettuce(unit)", price_per_unit=3.9, quantity=2)
+        premade_box3 = PremadeBox(
+            box_size="Large Box", num_of_boxes=1, content=[packVeggie3, unitVeggie1, unitVeggie2])
 
         db.session.add_all([staff1, staff2, staff3,
                             customer1, customer2, customer3, customer4, customer5,
@@ -89,20 +93,6 @@ def populate_data():
 
         db.session.flush()
 
-        premade_box_id_1 = premade_box1.id
-        premade_box_id_2 = premade_box2.id
-        premade_box_id_3 = premade_box3.id
-
-        weightedVeggie1 = weightedVeggie1.id
-        packVeggie1 = packVeggie1.id
-
-        weightedVeggie2 = weightedVeggie2.id
-        packVeggie2 = packVeggie2.id
-
-        packVeggie3 = packVeggie3.id
-        unitVeggie1 = unitVeggie1.id
-        unitVeggie2 = unitVeggie2.id
-
         order1 = Order(4, False, 5.25)
         order2 = Order(5, False, 8.7)
         order3 = Order(9, False, 72.8)
@@ -113,27 +103,7 @@ def populate_data():
         orderItem4 = OrderItem(11, 30.5, 3)
         orderItem5 = OrderItem(12, 32.8, 3)
 
-        # PremadeBoxContent
-        premade_box_content1 = PremadeBoxContent(
-            premade_box_id=premade_box_id_1, veggies_id=weightedVeggie1)
-        premade_box_content2 = PremadeBoxContent(
-            premade_box_id=premade_box_id_1, veggies_id=packVeggie1)
-
-        premade_box_content3 = PremadeBoxContent(
-            premade_box_id=premade_box_id_2, veggies_id=weightedVeggie2)
-        premade_box_content4 = PremadeBoxContent(
-            premade_box_id=premade_box_id_2, veggies_id=packVeggie2)
-
-        premade_box_content5 = PremadeBoxContent(
-            premade_box_id=premade_box_id_3, veggies_id=packVeggie3)
-        premade_box_content6 = PremadeBoxContent(
-            premade_box_id=premade_box_id_3, veggies_id=unitVeggie1)
-        premade_box_content7 = PremadeBoxContent(
-            premade_box_id=premade_box_id_3, veggies_id=unitVeggie2)
-
         db.session.add_all([
-            premade_box_content1, premade_box_content2, premade_box_content3,
-            premade_box_content4, premade_box_content5, premade_box_content6, premade_box_content7,
             order1, order2, order3,
             orderItem1, orderItem2, orderItem3, orderItem4, orderItem5])
 

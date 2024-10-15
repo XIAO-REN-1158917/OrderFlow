@@ -1,0 +1,54 @@
+{% extends "layout.html" %}
+{% block content %}
+<main class="container mt-5">
+    {% if session.get('need_new_order') %}
+    <div class="alert alert-info text-center">
+        <a href="{{url_for('customer.newOrder')}}" class="btn btn-primary">Please Create a New Order</a>
+    </div>
+    {% else %}
+    <div class="card">
+        <div class="card-header bg-success text-white">
+            <h2>Draft Order Details</h2>
+        </div>
+        <div class="card-body">
+            <p><strong>Order ID:</strong> {{ draft_order_details['order'].id }}</p>
+            <p><strong>Order Date:</strong> {{ draft_order_details['order'].order_date }}</p>
+            <p><strong>Delivery:</strong> {{draft_order_details['order'].is_delivery}}</p>
+            <p><strong>Status:</strong> {{draft_order_details['order'].status}}</p>
+            <p><strong>Order Amount:</strong> ${{draft_order_details['order'].order_price}}</p>
+
+            <table class="table table-bordered table-hover">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Name</th>
+                        <th>Price</th>
+                        <th>Quantity</th>
+                        <th>Item Amount</th>
+                        <th>Remove</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in draft_order_details['items'] %}
+                    <tr>
+                        <td>{{item['item_name']}}</td>
+                        <td>${{item['per_price'] or '-'}}</td>
+                        <td>{{item['quantity']}}</td>
+                        <td>${{item['item_price']}}</td>
+                        <td>
+                            <form action="{{url_for('customer.removeItemFromOrder')}}" method="post">
+                                <input type="hidden" name="item_id" value="{{item['item_id']}}">
+                                <input type="hidden" name="item_price" value="{{item['item_price']}}">
+                                <button type="submit" class="btn btn-danger btn-sm">
+                                    <i class="bi bi-trash"></i> Remove
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+</main>
+{% endblock %}
