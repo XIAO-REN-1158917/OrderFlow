@@ -1,0 +1,17 @@
+{% extends "layout.html" %}
+{% block content %}
+<main class="container mt-5">
+    <p>This is payment method page</p>
+    {% if can_charge_account %}
+    <form action="{{url_for('customer.chargeAccount')}}">
+        <button type="submit">Charge In My Account</button>
+    </form>
+    {% else %}
+    <p>The sum of the order amount and your outstanding balance exceeds your credit limit. </p>
+    <p>You need to pay for the order or reduce the order items.</p>
+    <a href="{{url_for('customer.currentOrder')}}">To Remove Items</a>
+    {% endif %}
+    <a href="{{url_for('customer.payByCredit')}}">Pay By Credit</a>
+    <a href="{{url_for('customer.payByDebit')}}">Pay By Credit</a>
+</main>
+{% endblock %}

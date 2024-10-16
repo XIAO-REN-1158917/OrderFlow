@@ -1,6 +1,6 @@
 from fhv.exts import db
 from sqlalchemy.orm import joinedload
-from fhv.models import Veggies, PremadeBox, WeightedVeggie, PackVeggie, UnitVeggie, Order, OrderItem, Item
+from fhv.models import Veggies, PremadeBox, WeightedVeggie, PackVeggie, UnitVeggie, Order, OrderItem, Item, Person
 
 
 class CustomerDAO:
@@ -36,3 +36,7 @@ class CustomerDAO:
         db.session.add(new_box)
         db.session.commit()
         return new_box
+
+    def get_user_by_id(self, user_id):
+        user = Person.query.filter_by(id=user_id).first()
+        return user

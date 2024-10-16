@@ -1,13 +1,16 @@
 from fhv.exts import db
 from fhv.dao.customer_dao import CustomerDAO
 from fhv.dao.order_dao import OrderDAO
-from fhv.models import Veggies, PremadeBox, WeightedVeggie, PackVeggie, UnitVeggie, Order, Item
+from fhv.dao.payment_dao import PaymentDAO
+
+from fhv.models import Veggies, PremadeBox, WeightedVeggie, PackVeggie, UnitVeggie, Order, Item, Customer
 
 
 class CustomerService:
-    def __init__(self, customer_dao: CustomerDAO, order_dao: OrderDAO):
+    def __init__(self, customer_dao: CustomerDAO, order_dao: OrderDAO, payment_dao: PaymentDAO):
         self.customer_dao = customer_dao
         self.order_dao = order_dao
+        self.payment_dao = payment_dao
 
     def get_veggies_list(self):
         veggies = [
@@ -167,3 +170,17 @@ class CustomerService:
             price = round(-float(price), 2)
         self.order_dao.update_order_amount(order_id, price)
         self.order_dao.toggle_order_delivery_status(order)
+
+    def place_order(self, order_id, balance, user_id, user_type):
+        order = self.order_dao.get_order_by_id(order_id)
+        user = self.customer_dao.get_user_by_id(user_id)
+        self.payment_dao.can_charge_account(user, order)
+        self.order_dao.place_draft_order(order)
+
+    def can_charge_account(self, order_id, user_id):
+        order = self.order_dao.get_order_by_id(order_id)
+        user = self.customer_dao.get_user_by_id(user_id)
+        if isinstance(user, Customer):
+            return order.order_price+user.balance < user.max_owing
+        else:
+            return order.order_price+user.balance < user.credit_limit

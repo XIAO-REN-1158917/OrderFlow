@@ -3,6 +3,8 @@ from flask import render_template
 from flask import request
 from fhv.dao.customer_dao import CustomerDAO
 from fhv.dao.order_dao import OrderDAO
+from fhv.dao.payment_dao import PaymentDAO
+
 from fhv.services.customer_service import CustomerService
 from fhv.exts import db
 
@@ -11,7 +13,8 @@ bp = Blueprint('customer', __name__, url_prefix='/customer')
 # Instantiate DAO and service objects once
 customer_dao = CustomerDAO()
 order_dao = OrderDAO()
-customer_service = CustomerService(customer_dao, order_dao)
+payment_dao = PaymentDAO()
+customer_service = CustomerService(customer_dao, order_dao, payment_dao)
 
 
 @bp.route('/index')
@@ -149,8 +152,35 @@ def removeItemFromOrder():
 
 @bp.route('/placeOrder', methods=['POST'])
 def placeOrder():
+    order_id = session.get('order_id')
+    balance = session.get('balance')
+    user_id = session.get('user_id')
+    user_type = session.get('user_type')
+    customer_service.place_order(order_id, balance, user_id, user_type)
+    return render_template('payment_method.html')
 
-    pass
+
+@bp.route('/paymentMethod')
+def paymentMethod():
+    order_id = session.get('order_id')
+    user_id = session.get('user_id')
+    can_charge_account = customer_service.can_charge_account(order_id, user_id)
+    return render_template('payment_method.html', can_charge_account=can_charge_account)
+
+
+@bp.route('/chargeAccount', methods=['POST'])
+def chargeAccount():
+    return redirect(url_for('customer.myOders'))
+
+
+@bp.route('/payByCredit')
+def payByCredit():
+    return render_template('pay_credit.html')
+
+
+@bp.route('/payByDebit')
+def payByDebit():
+    return render_template('pay_debit.html')
 
 
 @bp.route('/toggleDelivery', methods=['POST'])
@@ -163,3 +193,8 @@ def toggleDelivery():
 @bp.route('/myProfile/<int:user_id>')
 def myProfile(user_id):
     return render_template('myProfile.html')
+
+
+@bp.route('/myOrders')
+def myOrders():
+    return render_template('my_orders.html')

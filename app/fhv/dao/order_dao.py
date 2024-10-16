@@ -106,3 +106,7 @@ class OrderDAO:
         else:
             order.is_delivery = True
         db.session.commit()
+
+    def place_draft_order(self, order):
+        order.status = 'pending'
+        db.session.commit()
