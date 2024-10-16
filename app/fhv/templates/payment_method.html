@@ -8,6 +8,7 @@
     </form>
     {% else %}
     <p>The sum of the order amount and your outstanding balance exceeds your credit limit. </p>
+    <p>If you want to defer payment and add the order amount to your account balance</p>
     <p>You need to pay for the order or reduce the order items.</p>
     <a href="{{url_for('customer.currentOrder')}}">To Remove Items</a>
     {% endif %}
