@@ -80,6 +80,10 @@ class OrderDAO:
         order.order_price = order.order_price + Decimal(str(price))
         db.session.commit()
 
+    def update_order_status(self, order, status):
+        order.status = status
+        db.session.commit()
+
     def get_box_price(self, box):
         box_price = Decimal('0.00')
         for veggie in box.content:

@@ -18,6 +18,7 @@ class LoginService:
             elif person.type == 'customer':
                 session['balance'] = person.balance
                 session['address'] = person.address
+                session['credit_limit'] = person.max_owing
             elif person.type == 'corporate_customer':
                 session['balance'] = person.balance
                 session['address'] = person.address

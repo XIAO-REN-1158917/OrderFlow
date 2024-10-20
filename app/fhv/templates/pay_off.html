@@ -1,0 +1,22 @@
+{% extends "layout.html" %}
+{% block content %}
+<main class="container mt-5">
+    <div class="card shadow-lg p-4">
+        <h2 class="text-center mb-4">Payment Method</h2>
+        <div class="mb-3">
+            <p><strong>Current Balance:</strong> ${{ session.get('balance',none) }}</p>
+        </div>
+
+        <p class="mb-3">Choose your payment method:</p>
+
+        <div class="d-flex justify-content-between">
+            <a href="{{ url_for('customer.payByCredit') }}" class="btn btn-outline-primary flex-fill me-2">
+                Pay by Credit
+            </a>
+            <a href="{{ url_for('customer.payByDebit') }}" class="btn btn-outline-primary flex-fill ms-2">
+                Pay by Debit
+            </a>
+        </div>
+    </div>
+</main>
+{% endblock %}

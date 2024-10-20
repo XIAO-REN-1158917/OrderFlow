@@ -149,13 +149,13 @@ class CustomerService:
         return order
 
     def remove_item_form_order(self, order_id, item_id, item_price):
-        item_type = self.order_dao.get_type_by_item_id(item_id)
-        if item_type == 'premade_box':
-            box = self.customer_dao.get_box_by_id(item_id)
-            for veggie in box.content:
-                item_to_delete = Item.query.get(veggie.id)
-                db.session.delete(item_to_delete)
-                db.session.commit()
+        # item_type = self.order_dao.get_type_by_item_id(item_id)
+        # if item_type == 'premade_box':
+        #     box = self.customer_dao.get_box_by_id(item_id)
+        #     for veggie in box.content:
+        #         item_to_delete = Item.query.get(veggie.id)
+        #         db.session.delete(item_to_delete)
+        #         db.session.commit()
 
         item_to_delete = Item.query.get(item_id)
         db.session.delete(item_to_delete)
@@ -171,16 +171,22 @@ class CustomerService:
         self.order_dao.update_order_amount(order_id, price)
         self.order_dao.toggle_order_delivery_status(order)
 
-    def place_order(self, order_id, balance, user_id, user_type):
-        order = self.order_dao.get_order_by_id(order_id)
-        user = self.customer_dao.get_user_by_id(user_id)
-        self.payment_dao.can_charge_account(user, order)
-        self.order_dao.place_draft_order(order)
+    # def place_order(self, order_id, balance, user_id, user_type):
+    #     order = self.order_dao.get_order_by_id(order_id)
+    #     user = self.customer_dao.get_user_by_id(user_id)
+    #     self.payment_dao.can_charge_account(user, order)
+    #     self.order_dao.place_draft_order(order)
 
     def can_charge_account(self, order_id, user_id):
         order = self.order_dao.get_order_by_id(order_id)
         user = self.customer_dao.get_user_by_id(user_id)
         if isinstance(user, Customer):
-            return order.order_price+user.balance < user.max_owing
+            return order.order_price+user.balance <= user.max_owing, order.order_price
         else:
-            return order.order_price+user.balance < user.credit_limit
+            return order.order_price+user.balance <= user.credit_limit, order.order_price
+
+    def charge_account(self, order_id, user_id):
+        order = self.order_dao.get_order_by_id(order_id)
+        user = self.customer_dao.get_user_by_id(user_id)
+        self.payment_dao.update_balance(order.order_price, user)
+        self.order_dao.update_order_status(order, 'pending')

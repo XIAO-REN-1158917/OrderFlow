@@ -1,5 +1,7 @@
 {% extends "layout.html" %}
 {% block content %}
 <p>comprehensive info of this cutomer and something</p>
-<p>{{session.get('order_id')}}</p>
+{% if session.get('order_id',none) %}
+<p>You currently have an order that needs to be processed. Please go to "Current Order" to view your current order.</p>
+{% endif %}
 {% endblock %}

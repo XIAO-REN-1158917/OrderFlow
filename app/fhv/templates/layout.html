@@ -185,10 +185,9 @@
                 <h4 class="mb-4">Welcome,{{session.get('user_username', none)}}</h4>
             </a>
             <a href="{{url_for('customer.currentOrder')}}">Current Order</a>
-            <a href="{{url_for('customer.shoppingVeggie')}}">Shopping Veggies</a>
-            <a href="{{url_for('customer.shoppingBox')}}">Shopping Premade Box</a>
-
-
+            <a href="{{url_for('customer.shoppingVeggie')}}">Buy Veggies</a>
+            <a href="{{url_for('customer.shoppingBox')}}">Buy Premade Box</a>
+            <a href="{{url_for('customer.payOff')}}">Pay Off Outstanding Debt</a>
             <a href="{{url_for('customer.myOrders')}}">My Orders</a>
             <a href="#">My Payment</a>
             <a href="{{url_for('customer.myProfile',user_id=session.get('user_id'))}}">My Profile</a>

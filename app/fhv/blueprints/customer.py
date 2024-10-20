@@ -150,36 +150,50 @@ def removeItemFromOrder():
     return redirect(url_for('customer.currentOrder'))
 
 
-@bp.route('/placeOrder', methods=['POST'])
+@bp.route('/placeOrder')
 def placeOrder():
     order_id = session.get('order_id')
-    balance = session.get('balance')
     user_id = session.get('user_id')
-    user_type = session.get('user_type')
-    customer_service.place_order(order_id, balance, user_id, user_type)
-    return render_template('payment_method.html')
+    can_charge_account, order_amount = customer_service.can_charge_account(
+        order_id, user_id)
+    return render_template('payment_method.html',
+                           can_charge_account=can_charge_account,
+                           order_amount=order_amount)
 
 
-@bp.route('/paymentMethod')
-def paymentMethod():
-    order_id = session.get('order_id')
-    user_id = session.get('user_id')
-    can_charge_account = customer_service.can_charge_account(order_id, user_id)
-    return render_template('payment_method.html', can_charge_account=can_charge_account)
+# @bp.route('/paymentMethod')
+# def paymentMethod():
+#     order_id = session.get('order_id')
+#     user_id = session.get('user_id')
+#     can_charge_account = customer_service.can_charge_account(order_id, user_id)
+#     return render_template('payment_method.html', can_charge_account=can_charge_account)
 
 
 @bp.route('/chargeAccount', methods=['POST'])
 def chargeAccount():
-    return redirect(url_for('customer.myOders'))
+    order_id = session.get('order_id')
+    user_id = session.get('user_id')
+    customer_service.charge_account(order_id, user_id)
+    # order_amount = request.form['order_amount']
+    session['need_new_order'] = True
+    session['order_id'] = None
+
+    # print(order_amount)
+
+    return redirect(url_for('customer.myOrders'))
 
 
-@bp.route('/payByCredit')
+@bp.route('/payByCredit', methods=['POST'])
 def payByCredit():
+    order_amount = request.form['order_amount']
+    print(order_amount)
     return render_template('pay_credit.html')
 
 
-@bp.route('/payByDebit')
+@bp.route('/payByDebit', methods=['POST'])
 def payByDebit():
+    order_amount = request.form['order_amount']
+    print(order_amount)
     return render_template('pay_debit.html')
 
 
@@ -198,3 +212,8 @@ def myProfile(user_id):
 @bp.route('/myOrders')
 def myOrders():
     return render_template('my_orders.html')
+
+
+@bp.route('/payOff')
+def payOff():
+    return render_template('pay_off.html')

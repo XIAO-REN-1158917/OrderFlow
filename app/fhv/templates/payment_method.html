@@ -1,18 +1,48 @@
 {% extends "layout.html" %}
+
 {% block content %}
 <main class="container mt-5">
-    <p>This is payment method page</p>
-    {% if can_charge_account %}
-    <form action="{{url_for('customer.chargeAccount')}}">
-        <button type="submit">Charge In My Account</button>
-    </form>
-    {% else %}
-    <p>The sum of the order amount and your outstanding balance exceeds your credit limit. </p>
-    <p>If you want to defer payment and add the order amount to your account balance</p>
-    <p>You need to pay for the order or reduce the order items.</p>
-    <a href="{{url_for('customer.currentOrder')}}">To Remove Items</a>
-    {% endif %}
-    <a href="{{url_for('customer.payByCredit')}}">Pay By Credit</a>
-    <a href="{{url_for('customer.payByDebit')}}">Pay By Credit</a>
+    <div class="card shadow-lg p-4">
+        <h2 class="text-center mb-4">Payment Method</h2>
+        <div class="mb-3">
+            <p><strong>Max Owing:</strong> ${{ session.get('credit_limit',none) }}</p>
+            <p><strong>Current Balance:</strong> ${{ session.get('balance',none) }}</p>
+            <p><strong>Order Amount:</strong> ${{ order_amount }}</p>
+        </div>
+
+        <p class="mb-3">Choose your payment method:</p>
+
+        {% if can_charge_account %}
+        <form action="{{ url_for('customer.chargeAccount') }}" method="post" class="mb-3">
+            <button type="submit" class="btn btn-primary w-100 mb-2">
+                <input type="hidden" name="order_amount" value="{{order_amount}}">
+                Charge to My Account for Later Payment
+            </button>
+        </form>
+        {% else %}
+        <div class="alert alert-warning" role="alert">
+            <p class="mb-1">The sum of the order amount and your outstanding balance exceeds your credit limit.</p>
+            <p class="mb-1">To defer payment and add the order amount to your account balance, reduce order items or pay
+                now.</p>
+        </div>
+        <a href="{{ url_for('customer.currentOrder') }}" class="btn btn-outline-danger w-100 mb-3">
+            Remove Items from Order
+        </a>
+        {% endif %}
+        <form action="{{ url_for('customer.payByCredit') }}" method="post" class="mb-3">
+            <button type="submit" class="btn btn-primary w-100 mb-2">
+                <input type="hidden" name="order_amount" value="{{order_amount}}">
+                Pay by Credit
+            </button>
+        </form>
+        <form action="{{ url_for('customer.payByDebit') }}" method="post" class="mb-3">
+            <button type="submit" class="btn btn-primary w-100 mb-2">
+                <input type="hidden" name="order_amount" value="{{order_amount}}">
+                Pay by Debit
+            </button>
+        </form>
+
+
+    </div>
 </main>
 {% endblock %}
