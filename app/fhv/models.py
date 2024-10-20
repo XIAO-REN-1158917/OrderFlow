@@ -80,7 +80,7 @@ class Payment(db.Model):
     __tablename__ = 'payment'
     id = db.Column(db.Integer, primary_key=True)
     amount = db.Column(Numeric(10, 2), nullable=False)
-    status = db.Column(db.Enum('successful', 'failed', 'canceled', name='order_status'),
+    status = db.Column(db.Enum('successful', 'failed', name='payment_status'),
                        nullable=False, default='successfule')
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.now)
     customer_id = db.Column(db.Integer, db.ForeignKey(
@@ -222,9 +222,6 @@ class PremadeBox(Item):
                          'Large Box'), name='premade_box_size', nullable=False)
     num_of_boxes = db.Column(db.Integer, nullable=False)
 
-    # content = db.relationship('Veggie', backref='premade_box')
-    # content = db.relationship(
-    #     'Veggies', backref='premade_box', cascade="all, delete-orphan")
     content = db.relationship('Veggies', backref='premade_box',
                               cascade="all, delete-orphan", foreign_keys='Veggies.premade_box_id')
 
@@ -274,7 +271,7 @@ class Order(db.Model):
     order_date = db.Column(db.Date, nullable=False, default=date.today)
     is_delivery = db.Column(db.Boolean, nullable=False, default=False)
 
-    status = db.Column(db.Enum('draft', 'pending', 'processing', 'canceled', name='order_status'),
+    status = db.Column(db.Enum('draft', 'pending', 'fulfilled', name='order_status'),
                        nullable=False, default='draft')
     order_price = db.Column(Numeric(10, 2), nullable=False, default=0.00)
     delivery_fee = 10.0

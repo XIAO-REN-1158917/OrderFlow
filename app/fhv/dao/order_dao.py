@@ -123,3 +123,8 @@ class OrderDAO:
         if customer_id is not None:
             query = query.filter_by(customer_id=customer_id)
         return query.all()
+
+    def get_order_list_by_status(self, status):
+        orders = Order.query.filter_by(
+            status=status).order_by(desc(Order.order_date)).all()
+        return orders if orders else None

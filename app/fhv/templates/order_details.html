@@ -39,7 +39,7 @@
                     {% endfor %}
                 </tbody>
             </table>
-            {% if orderDetail['order'].status=='pending' %}
+            {% if orderDetail['order'].status=='pending' and session.get('user_type')!='staff' %}
             <form action="{{url_for('customer.cancelPendingOrder')}}" method="post">
                 <input type="hidden" name="order_id" value="{{orderDetail['order'].id}}">
                 <button type="submit">Cancel Order</button>
@@ -49,7 +49,6 @@
             <!-- Order Amount on the right -->
             <p class="fs-4 mb-0"><strong>Order Amount:</strong> ${{ orderDetail['order'].order_price }}</p>
         </div>
-    </div>
     </div>
 
 </main>

@@ -1,0 +1,86 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<main class="container mt-5">
+    <h2 class="text-center mb-4">Customer Details</h2>
+
+    <!-- Customer Info Section -->
+    <section class="mb-5">
+        <h4 class="mb-3">Customer Info</h4>
+        <ul class="list-group">
+            <li class="list-group-item"><strong>Username:</strong> {{ customer.username }}</li>
+            <li class="list-group-item"><strong>Name:</strong> {{ customer.firstname }} {{ customer.lastname }}</li>
+            <li class="list-group-item"><strong>Type:</strong> {{ customer.type }}</li>
+            <li class="list-group-item">
+                <strong>Credit Limit:</strong>
+                ${{ customer.max_owing if customer.type == 'customer' else customer.credit_limit }}
+            </li>
+        </ul>
+    </section>
+
+    <!-- Customer Orders Section -->
+    <section class="mb-5">
+        <h4 class="mb-3">Customer Orders</h4>
+        {% if orders %}
+        <div class="table-responsive">
+            <table class="table table-striped table-hover align-middle">
+                <thead class="table-dark">
+                    <tr>
+                        <th scope="col">Date</th>
+                        <th scope="col">Order Amount</th>
+                        <th scope="col">Status</th>
+                        <th scope="col">View</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for order in orders %}
+                    <tr>
+                        <td>{{ order.order_date }}</td>
+                        <td>${{ order.order_price }}</td>
+                        <td>{{ order.status }}</td>
+                        <td>
+                            <a href="{{ url_for('customer.orderDetails', order_id=order.id) }}"
+                                class="btn btn-outline-primary btn-sm">View</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="alert alert-info text-center" role="alert">No order history</div>
+        {% endif %}
+    </section>
+
+    <!-- Customer Payments Section -->
+    <section class="mb-5">
+        <h4 class="mb-3">Customer Payments</h4>
+        {% if payments %}
+        <div class="table-responsive">
+            <table class="table table-striped table-hover align-middle">
+                <thead class="table-dark">
+                    <tr>
+                        <th scope="col">Amount</th>
+                        <th scope="col">Status</th>
+                        <th scope="col">Payment Method</th>
+                        <th scope="col">Time</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for payment in payments %}
+                    <tr>
+                        <td>${{ payment['amount'] }}</td>
+                        <td>{{ payment['status'] }}</td>
+                        <td>{{ payment['type'] }}</td>
+                        <td>{{ payment['created_at'] }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="alert alert-info text-center" role="alert">No payment history</div>
+        {% endif %}
+    </section>
+</main>
+{% endblock %}

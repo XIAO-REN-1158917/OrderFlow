@@ -3,7 +3,7 @@ from fhv.dao.customer_dao import CustomerDAO
 from fhv.dao.order_dao import OrderDAO
 from fhv.dao.payment_dao import PaymentDAO
 
-from fhv.models import Veggies, PremadeBox, WeightedVeggie, PackVeggie, UnitVeggie, Order, Item, Customer
+from fhv.models import Order, Item, Customer
 
 
 class CustomerService:
@@ -169,12 +169,6 @@ class CustomerService:
             price = round(-float(price), 2)
         self.order_dao.update_order_amount(order_id, price)
         self.order_dao.toggle_order_delivery_status(order)
-
-    # def place_order(self, order_id, balance, user_id, user_type):
-    #     order = self.order_dao.get_order_by_id(order_id)
-    #     user = self.customer_dao.get_user_by_id(user_id)
-    #     self.payment_dao.can_charge_account(user, order)
-    #     self.order_dao.place_draft_order(order)
 
     def can_charge_account(self, order_id, user_id):
         order = self.order_dao.get_order_by_id(order_id)

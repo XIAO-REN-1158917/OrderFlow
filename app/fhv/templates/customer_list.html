@@ -1,0 +1,48 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<main class="container mt-5">
+    <h2 class="text-center mb-4">Customer List for Staff</h2>
+
+    {% if customers %}
+    <div class="table-responsive">
+        <table class="table table-striped table-hover align-middle">
+            <thead class="table-dark">
+                <tr>
+                    <th scope="col">Customer ID</th>
+                    <th scope="col">Username</th>
+                    <th scope="col">Name</th>
+                    <th scope="col">Type</th>
+                    <th scope="col">View</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for customer in customers %}
+                <tr>
+                    <td>{{ customer.id }}</td>
+                    <td>{{ customer.username }}</td>
+                    <td>{{ customer.firstname }} {{ customer.lastname }}</td>
+                    <td>
+                        <span
+                            class="badge {% if customer.type == 'Corporate' %}bg-primary{% else %}bg-secondary{% endif %}">
+                            {{ customer.type }}
+                        </span>
+                    </td>
+                    <td>
+                        <a href="{{ url_for('staff.customerDetails', customer_id=customer.id) }}"
+                            class="btn btn-outline-primary btn-sm">
+                            View
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="alert alert-info text-center" role="alert">
+        No customers found.
+    </div>
+    {% endif %}
+</main>
+{% endblock %}

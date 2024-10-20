@@ -6,7 +6,6 @@ from fhv.dao.order_dao import OrderDAO
 from fhv.dao.payment_dao import PaymentDAO
 
 from fhv.services.customer_service import CustomerService
-from fhv.exts import db
 
 bp = Blueprint('customer', __name__, url_prefix='/customer')
 

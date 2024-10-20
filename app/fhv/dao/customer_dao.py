@@ -1,6 +1,7 @@
+from typing import List, Optional
 from fhv.exts import db
 from sqlalchemy.orm import joinedload
-from fhv.models import Veggies, PremadeBox, WeightedVeggie, PackVeggie, UnitVeggie, Order, OrderItem, Item, Person
+from fhv.models import Veggies, PremadeBox, WeightedVeggie, PackVeggie, UnitVeggie, Order, OrderItem, Item, Person, Customer
 
 
 class CustomerDAO:
@@ -40,3 +41,9 @@ class CustomerDAO:
     def get_user_by_id(self, user_id):
         user = Person.query.filter_by(id=user_id).first()
         return user
+
+    def get_customer_by_id(self, customer_id: int):
+        return Person.query.filter_by(id=customer_id).first()
+
+    def all_customer(self, staff):
+        return Person.query.filter(Person.type != staff).all()

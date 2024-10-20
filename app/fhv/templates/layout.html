@@ -184,7 +184,9 @@
                 <h4 class="mb-4">Welcome,{{session.get('user_username', none)}}</h4>
             </a>
             {% if session['user_type']=='staff' %}
-
+            <a href="{{url_for('staff.currentOrdersForStaff')}}">Current Orders</a>
+            <a href="{{url_for('staff.previousOdersForStaff')}}">Previous Orders</a>
+            <a href="{{url_for('staff.customerList')}}">Customer List</a>
             {% else %}
             <a href="{{url_for('customer.currentOrder')}}">Current Order</a>
             <a href="{{url_for('customer.shoppingVeggie')}}">Buy Veggies</a>
