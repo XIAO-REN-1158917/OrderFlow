@@ -1,4 +1,7 @@
 from decimal import Decimal
+from typing import List, Optional
+
+from sqlalchemy import desc
 from fhv.exts import db
 from sqlalchemy.orm import joinedload
 from fhv.models import Item, Veggies, PremadeBox, WeightedVeggie, PackVeggie, UnitVeggie, Order, OrderItem
@@ -11,7 +14,7 @@ class OrderDAO:
             customer_id=customer_id, status='draft').first()
         return draft_order
 
-    def get_draft_order_items(self, draft_order_id):
+    def get_order_items_by_order_id(self, order_id):
         item_list = []
 
         itemLines = db.session.query(
@@ -21,7 +24,7 @@ class OrderDAO:
             Item.type
         ).select_from(OrderItem).\
             outerjoin(Item, OrderItem.item_id == Item.id).\
-            filter(OrderItem.order_id == draft_order_id).all()
+            filter(OrderItem.order_id == order_id).all()
 
         for line in itemLines:
             item_detail = {
@@ -114,3 +117,10 @@ class OrderDAO:
     def place_draft_order(self, order):
         order.status = 'pending'
         db.session.commit()
+
+    def get_order_list(self, customer_id: Optional[int] = None) -> List[Order]:
+        query = Order.query.order_by(desc(Order.order_date))
+        if customer_id is not None:
+            query = query.filter_by(customer_id=customer_id)
+
+        return query.all()

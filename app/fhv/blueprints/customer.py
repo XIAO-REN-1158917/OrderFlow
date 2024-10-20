@@ -211,7 +211,24 @@ def myProfile(user_id):
 
 @bp.route('/myOrders')
 def myOrders():
-    return render_template('my_orders.html')
+    user_id = session.get('user_id')
+    orders = customer_service.get_all_orders_for_customer(user_id)
+    return render_template('my_orders.html', orders=orders)
+
+
+@bp.route('/orderDetails/<int:order_id>')
+def orderDetails(order_id):
+    orderDetail = customer_service.get_order_detail_by_order_id(order_id)
+    return render_template('order_details.html', orderDetail=orderDetail)
+
+
+@bp.route('/cancelPendingOrder', methods=['POST'])
+def cancelPendingOrder():
+    order_id = request.form['order_id']
+    user_id = session.get('user_id')
+    print(order_id)
+    customer_service.cancel_pending_order(order_id, user_id)
+    return redirect(url_for('customer.myOrders'))
 
 
 @bp.route('/payOff')

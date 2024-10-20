@@ -132,8 +132,7 @@ class CustomerService:
         draft_order_details = {}
         draft_order = self.order_dao.check_draft_order(customer_id)
         if draft_order:
-
-            items = self.order_dao.get_draft_order_items(draft_order.id)
+            items = self.order_dao.get_order_items_by_order_id(draft_order.id)
             draft_order_details = {
                 'order': draft_order,
                 'items': items
@@ -190,3 +189,27 @@ class CustomerService:
         user = self.customer_dao.get_user_by_id(user_id)
         self.payment_dao.update_balance(order.order_price, user)
         self.order_dao.update_order_status(order, 'pending')
+
+    def get_all_orders_for_customer(self, customer_id):
+        orders = self.order_dao.get_order_list(customer_id)
+        return orders
+
+    def get_order_detail_by_order_id(self, order_id):
+        orderDetail = {}
+        orderInfo = self.order_dao.get_order_by_id(order_id)
+        if orderInfo:
+            items = self.order_dao.get_order_items_by_order_id(orderInfo.id)
+            orderDetail = {
+                'order': orderInfo,
+                'items': items
+            }
+        else:
+            orderDetail = None
+        return orderDetail
+
+    def cancel_pending_order(self, order_id, user_id):
+        order = self.order_dao.get_order_by_id(order_id)
+        user = self.customer_dao.get_user_by_id(user_id)
+        self.order_dao.update_order_status(order, 'canceled')
+        subtraction = -order.order_price
+        self.payment_dao.update_balance(subtraction, user)

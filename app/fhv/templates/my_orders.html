@@ -2,5 +2,26 @@
 {% block content %}
 <main class="container mt-5">
     <p>This is my orders page</p>
+    <table>
+        <thead>
+            <th>Date</th>
+            <th>Order Amount</th>
+            <th>Status</th>
+            <th>View</th>
+        </thead>
+        <tbody>
+            {% for order in orders %}
+            <tr>
+                <td>{{order.order_date}}</td>
+                <td>{{order.order_price}}</td>
+                <td>{{order.status}}</td>
+                <td>
+                    <a href="{{url_for('customer.orderDetails',order_id=order.id)}}">View</a>
+                </td>
+            </tr>
+            {% endfor %}
+
+        </tbody>
+    </table>
 </main>
 {% endblock %}

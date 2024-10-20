@@ -191,6 +191,10 @@
             <a href="{{url_for('customer.myOrders')}}">My Orders</a>
             <a href="#">My Payment</a>
             <a href="{{url_for('customer.myProfile',user_id=session.get('user_id'))}}">My Profile</a>
+            <div class="mt-5">
+                <p>Your Account</p>
+                <p>Balance: ${{session.get('balance')}}</p>
+            </div>
 
         </div>
 
