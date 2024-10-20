@@ -2,5 +2,24 @@
 {% block content %}
 <main class="container mt-5">
     <p>This is pay by debit</p>
+    <form action="{{ url_for('customer.processPayByDebit') }}" method="post" class="mb-3">
+        <input type="hidden" name="type" value="{{type}}">
+        <input type="hidden" name="order_amount" value="{{order_amount}}">
+
+        <label for="account_number">Account Number</label>
+        <input type="text" name="account_number" id="account_number" placeholder="xxxx-xxxx-xxxx-xxxx">
+
+        <label for="bank_name">Bank Name</label>
+        <input type="text" name="bank_name" id="bank_name" placeholder="Payee Bank Name">
+
+
+        <label for="payee">payee</label>
+        <input type="text" name="payee" id="payee" placeholder="Payee name">
+
+
+        <button type="submit" class="btn btn-primary w-100 mb-2">
+            Pay
+        </button>
+    </form>
 </main>
 {% endblock %}

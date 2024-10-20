@@ -220,5 +220,25 @@ class CustomerService:
         self.payment_dao.add_new_payment_credit(
             order.order_price, order.customer_id, card_number, cardholder, expiry, cvv)
 
+    def processing_pay_by_credit_balance(self, user_id, order_amount, card_number, cardholder, expiry, cvv):
+        user = self.customer_dao.get_user_by_id(user_id)
+        subtraction = -float(order_amount)
+        self.payment_dao.update_balance(subtraction, user)
+        self.payment_dao.add_new_payment_credit(
+            order_amount, user.id, card_number, cardholder, expiry, cvv)
+
+    def processing_pay_by_debit_order(self, order_id, account_number, bank_name, payee):
+        order = self.order_dao.get_order_by_id(order_id)
+        self.order_dao.update_order_status(order, 'pending')
+        self.payment_dao.add_new_payment_debit(
+            order.order_price, order.customer_id, account_number, bank_name, payee)
+
+    def processing_pay_by_debit_balance(self, user_id, order_amount, account_number, bank_name, payee):
+        user = self.customer_dao.get_user_by_id(user_id)
+        subtraction = -float(order_amount)
+        self.payment_dao.update_balance(subtraction, user)
+        self.payment_dao.add_new_payment_debit(
+            order_amount, user.id, account_number, bank_name, payee)
+
     def get_payments_for_customer(self, user_id):
         return self.payment_dao.get_payment_list(user_id)

@@ -80,7 +80,7 @@ class Payment(db.Model):
     __tablename__ = 'payment'
     id = db.Column(db.Integer, primary_key=True)
     amount = db.Column(Numeric(10, 2), nullable=False)
-    status = db.Column(db.Enum('successfule', 'failed', 'canceled', name='order_status'),
+    status = db.Column(db.Enum('successful', 'failed', 'canceled', name='order_status'),
                        nullable=False, default='successfule')
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.now)
     customer_id = db.Column(db.Integer, db.ForeignKey(

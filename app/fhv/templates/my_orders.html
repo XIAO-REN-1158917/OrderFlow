@@ -2,6 +2,7 @@
 {% block content %}
 <main class="container mt-5">
     <p>This is my orders page</p>
+    {% if orders %}
     <table>
         <thead>
             <th>Date</th>
@@ -23,5 +24,8 @@
 
         </tbody>
     </table>
+    {% else %}
+    <p>No order history</p>
+    {% endif %}
 </main>
 {% endblock %}

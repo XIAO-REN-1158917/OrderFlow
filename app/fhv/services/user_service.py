@@ -12,6 +12,8 @@ class LoginService:
         if person and person.check_password(password):
             session['user_id'] = person.id
             session['user_username'] = person.username
+            session['user_firstname'] = person.firstname
+            session['user_lastname'] = person.lastname
             session['user_type'] = person.type
             if person.type == 'staff':
                 session['department'] = person.department
@@ -23,7 +25,7 @@ class LoginService:
                 session['balance'] = person.balance
                 session['address'] = person.address
                 session['credit_limit'] = person.credit_limit
-            if person.address == 'Riccarton Chch' or person.address == 'Addington Chch':
+            if session.get('address', None) == 'Riccarton Chch' or session.get('address', None) == 'Addington Chch':
                 session['deliverable'] = True
             else:
                 session['deliverable'] = False

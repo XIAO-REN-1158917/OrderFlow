@@ -183,16 +183,28 @@
             <a href="{{url_for('customer.index')}}">
                 <h4 class="mb-4">Welcome,{{session.get('user_username', none)}}</h4>
             </a>
+            {% if session['user_type']=='staff' %}
+
+            {% else %}
             <a href="{{url_for('customer.currentOrder')}}">Current Order</a>
             <a href="{{url_for('customer.shoppingVeggie')}}">Buy Veggies</a>
             <a href="{{url_for('customer.shoppingBox')}}">Buy Premade Box</a>
             <a href="{{url_for('customer.payOff')}}">Pay Off Outstanding Debt</a>
             <a href="{{url_for('customer.myOrders')}}">My Orders</a>
             <a href="{{url_for('customer.myPayments')}}">My Payment</a>
-            <a href="{{url_for('customer.myProfile',user_id=session.get('user_id'))}}">My Profile</a>
+            {% endif %}
             <div class="mt-5">
                 <p>Your Account</p>
+                <p>Name: {{session.get('user_lastname')}} {{session.get('user_firstname')}}</p>
+                <p>Account Type: {{session.get('user_type')}}</p>
+                {% if session.get('user_type')=='staff' %}
+                <p>Department: {{session.get('department')}}</p>
+                {% else %}
                 <p>Balance: ${{session.get('balance')}}</p>
+                <p>Address: {{session.get('address')}}</p>
+                <p>Credit Limit: ${{session.get('credit_limit')}}</p>
+                {% endif %}
+
             </div>
 
         </div>

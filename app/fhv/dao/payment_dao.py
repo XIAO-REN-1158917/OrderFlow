@@ -5,7 +5,7 @@ from flask import session
 from sqlalchemy import desc
 from fhv.exts import db
 from sqlalchemy.orm import joinedload
-from fhv.models import Payment, PayByCredit
+from fhv.models import Payment, PayByCredit, PayByDebit
 from sqlalchemy.orm import aliased
 
 
@@ -19,6 +19,13 @@ class PaymentDAO:
     def add_new_payment_credit(self, amount, customer_id, card_number, cardholder, expiry, cvv):
         new_payment = PayByCredit(
             amount, customer_id, card_number, cardholder, expiry, cvv)
+        db.session.add(new_payment)
+        db.session.commit()
+        return new_payment
+
+    def add_new_payment_debit(self, amount, customer_id, account_number, bank_name, payee):
+        new_payment = PayByDebit(
+            amount, customer_id, account_number, bank_name, payee)
         db.session.add(new_payment)
         db.session.commit()
         return new_payment

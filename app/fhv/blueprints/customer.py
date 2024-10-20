@@ -177,10 +177,8 @@ def chargeAccount():
 
 @bp.route('/payByCredit', methods=['POST'])
 def payByCredit():
-
     order_amount = request.form['order_amount']
     type = request.form['type']
-
     print(order_amount)
 
     return render_template('pay_credit.html', order_amount=order_amount, type=type)
@@ -200,19 +198,43 @@ def processPayByCredit():
         customer_service.processing_pay_by_credit_order(
             order_id, card_number, cardholder, expiry, cvv)
     elif type == 'balance':
-        customer_service.processing_pay_by_credit(
-            order_id, user_id, order_amount)
+        customer_service.processing_pay_by_credit_balance(
+            user_id, order_amount, card_number, cardholder, expiry, cvv)
     session['need_new_order'] = True
     session['order_id'] = None
 
-    return redirect('customer.myPayments')
+    return redirect('myPayments')
 
 
 @bp.route('/payByDebit', methods=['POST'])
 def payByDebit():
     order_amount = request.form['order_amount']
+    type = request.form['type']
     print(order_amount)
-    return render_template('pay_debit.html')
+    return render_template('pay_debit.html', order_amount=order_amount, type=type)
+
+
+@bp.route('/processPayByDebit', methods=['POST'])
+def processPayByDebit():
+    order_id = session.get('order_id')
+    user_id = session.get('user_id')
+    type = request.form['type']
+    order_amount = request.form['order_amount']
+    account_number = request.form['account_number']
+    bank_name = request.form['bank_name']
+    payee = request.form['payee']
+
+    if type == 'order':
+        customer_service.processing_pay_by_debit_order(
+            order_id, account_number, bank_name, payee)
+    elif type == 'balance':
+        customer_service.processing_pay_by_debit_balance(
+            user_id, order_amount, account_number, bank_name, payee)
+
+    session['need_new_order'] = True
+    session['order_id'] = None
+
+    return redirect('myPayments')
 
 
 @bp.route('/toggleDelivery', methods=['POST'])
