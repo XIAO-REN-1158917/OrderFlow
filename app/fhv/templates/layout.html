@@ -141,7 +141,6 @@
         }
     </style>
 
-    <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </head>
 
@@ -189,7 +188,7 @@
             <a href="{{url_for('customer.shoppingBox')}}">Buy Premade Box</a>
             <a href="{{url_for('customer.payOff')}}">Pay Off Outstanding Debt</a>
             <a href="{{url_for('customer.myOrders')}}">My Orders</a>
-            <a href="#">My Payment</a>
+            <a href="{{url_for('customer.myPayments')}}">My Payment</a>
             <a href="{{url_for('customer.myProfile',user_id=session.get('user_id'))}}">My Profile</a>
             <div class="mt-5">
                 <p>Your Account</p>

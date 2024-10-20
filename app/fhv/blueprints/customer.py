@@ -161,14 +161,6 @@ def placeOrder():
                            order_amount=order_amount)
 
 
-# @bp.route('/paymentMethod')
-# def paymentMethod():
-#     order_id = session.get('order_id')
-#     user_id = session.get('user_id')
-#     can_charge_account = customer_service.can_charge_account(order_id, user_id)
-#     return render_template('payment_method.html', can_charge_account=can_charge_account)
-
-
 @bp.route('/chargeAccount', methods=['POST'])
 def chargeAccount():
     order_id = session.get('order_id')
@@ -185,9 +177,35 @@ def chargeAccount():
 
 @bp.route('/payByCredit', methods=['POST'])
 def payByCredit():
+
     order_amount = request.form['order_amount']
+    type = request.form['type']
+
     print(order_amount)
-    return render_template('pay_credit.html')
+
+    return render_template('pay_credit.html', order_amount=order_amount, type=type)
+
+
+@bp.route('/processPayByCredit', methods=['POST'])
+def processPayByCredit():
+    order_id = session.get('order_id')
+    user_id = session.get('user_id')
+    type = request.form['type']
+    order_amount = request.form['order_amount']
+    card_number = request.form['card_number']
+    expiry = request.form['expiry']
+    cardholder = request.form['cardholder']
+    cvv = request.form['cvv']
+    if type == 'order':
+        customer_service.processing_pay_by_credit_order(
+            order_id, card_number, cardholder, expiry, cvv)
+    elif type == 'balance':
+        customer_service.processing_pay_by_credit(
+            order_id, user_id, order_amount)
+    session['need_new_order'] = True
+    session['order_id'] = None
+
+    return redirect('customer.myPayments')
 
 
 @bp.route('/payByDebit', methods=['POST'])
@@ -222,12 +240,19 @@ def orderDetails(order_id):
     return render_template('order_details.html', orderDetail=orderDetail)
 
 
+@bp.route('/myPayments')
+def myPayments():
+    user_id = session.get('user_id')
+    payments = customer_service.get_payments_for_customer(user_id)
+    return render_template('my_payments.html', payments=payments)
+
+
 @bp.route('/cancelPendingOrder', methods=['POST'])
 def cancelPendingOrder():
     order_id = request.form['order_id']
     user_id = session.get('user_id')
     print(order_id)
-    customer_service.cancel_pending_order(order_id, user_id)
+    customer_service.cancel_pending_order_charge_account(order_id, user_id)
     return redirect(url_for('customer.myOrders'))
 
 

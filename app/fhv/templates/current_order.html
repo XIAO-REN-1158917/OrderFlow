@@ -16,11 +16,11 @@
             <p><strong>Delivery:</strong> {% if draft_order_details['order'].is_delivery %}YES{%else%}NO{%endif%}</p>
             <p><strong>Status:</strong> {{ draft_order_details['order'].status }}</p>
 
-            <p><strong>Balance:</strong> {{ session.get('balance') }}</p>
+            <p><strong>Balance:</strong> ${{ session.get('balance') }}</p>
             <p><strong>Address:</strong> {{ session.get('address') }}</p>
 
             {% if session.get('credit_limit', none) %}
-            <p><strong>Credit Limit:</strong> {{ session.get('credit_limit') }}</p>
+            <p><strong>Credit Limit:</strong> ${{ session.get('credit_limit') }}</p>
             {% endif %}
 
             <table class="table table-bordered table-hover mt-4">

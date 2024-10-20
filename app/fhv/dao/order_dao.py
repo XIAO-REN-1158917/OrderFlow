@@ -122,5 +122,4 @@ class OrderDAO:
         query = Order.query.order_by(desc(Order.order_date))
         if customer_id is not None:
             query = query.filter_by(customer_id=customer_id)
-
         return query.all()

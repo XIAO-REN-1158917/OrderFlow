@@ -207,9 +207,18 @@ class CustomerService:
             orderDetail = None
         return orderDetail
 
-    def cancel_pending_order(self, order_id, user_id):
+    def cancel_pending_order_charge_account(self, order_id, user_id):
         order = self.order_dao.get_order_by_id(order_id)
         user = self.customer_dao.get_user_by_id(user_id)
         self.order_dao.update_order_status(order, 'canceled')
         subtraction = -order.order_price
         self.payment_dao.update_balance(subtraction, user)
+
+    def processing_pay_by_credit_order(self, order_id, card_number, cardholder, expiry, cvv):
+        order = self.order_dao.get_order_by_id(order_id)
+        self.order_dao.update_order_status(order, 'pending')
+        self.payment_dao.add_new_payment_credit(
+            order.order_price, order.customer_id, card_number, cardholder, expiry, cvv)
+
+    def get_payments_for_customer(self, user_id):
+        return self.payment_dao.get_payment_list(user_id)

@@ -2,5 +2,28 @@
 {% block content %}
 <main class="container mt-5">
     <p>This is pay by credit</p>
+    <form action="{{ url_for('customer.processPayByCredit') }}" method="post" class="mb-3">
+        <input type="hidden" name="type" value="{{type}}">
+        <input type="hidden" name="order_amount" value="{{order_amount}}">
+        <label for="card_number">Card Number</label>
+        <input type="text" name="card_number" id="card_number" placeholder="xxxx-xxxx-xxxx-xxxx">
+
+        <label for="cardholder">Cardholder</label>
+        <input type="text" name="cardholder" id="cardholder" placeholder="Name On Card">
+
+        <label for="expiry">expiry</label>
+        <input type="text" name="expiry" id="expiry" placeholder="MM/YY">
+
+        <label for="cvv">cvv</label>
+        <input type="text" name="cvv" id="cvv" placeholder="xxx">
+
+
+        <button type="submit" class="btn btn-primary w-100 mb-2">
+            Pay
+        </button>
+    </form>
 </main>
 {% endblock %}
+
+def __init__(self, amount: float, status: str, customer_id: int, card_number: str, cardholder: str, expiry: str, cvv:
+str):

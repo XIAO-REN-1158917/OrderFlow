@@ -6,17 +6,43 @@
         <div class="mb-3">
             <p><strong>Current Balance:</strong> ${{ session.get('balance',none) }}</p>
         </div>
+        {% if session.get('balance') and session.get('balance')|float != 0 %}
 
+        <div class="mb-3">
+            <input type="number" class="form-control" id="paymentAmount" placeholder="Enter amount" min="0" step="0.01"
+                required>
+        </div>
         <p class="mb-3">Choose your payment method:</p>
 
         <div class="d-flex justify-content-between">
-            <a href="{{ url_for('customer.payByCredit') }}" class="btn btn-outline-primary flex-fill me-2">
-                Pay by Credit
-            </a>
-            <a href="{{ url_for('customer.payByDebit') }}" class="btn btn-outline-primary flex-fill ms-2">
-                Pay by Debit
-            </a>
+            <!-- Pay by Credit -->
+            <form action="{{ url_for('customer.payByCredit') }}" method="post" class="mb-3" onsubmit="setAmount(this)">
+                <input type="hidden" name="type" value="balance">
+                <input type="hidden" name="order_amount" id="orderAmountCredit" value="">
+                <button type="submit" class="btn btn-primary w-100 mb-2">Pay by Credit</button>
+            </form>
+
+            <!-- Pay by Debit -->
+            <form action="{{ url_for('customer.payByDebit') }}" method="post" class="mb-3" onsubmit="setAmount(this)">
+                <input type="hidden" name="type" value="balance">
+                <input type="hidden" name="order_amount" id="orderAmountDebit" value="">
+                <button type="submit" class="btn btn-primary w-100 mb-2">Pay by Debit</button>
+            </form>
         </div>
+        {% else %}
+        <p>You have nothing to pay</p>
+        {% endif %}
     </div>
 </main>
+<script>
+    function setAmount(form) {
+        const amount = document.getElementById('paymentAmount').value;
+        if (amount) {
+            form.querySelector('input[name="order_amount"]').value = amount;
+        } else {
+            alert('Please enter a valid amount.');
+            event.preventDefault();
+        }
+    }
+</script>
 {% endblock %}

@@ -21,22 +21,25 @@
         </form>
         {% else %}
         <div class="alert alert-warning" role="alert">
-            <p class="mb-1">The sum of the order amount and your outstanding balance exceeds your credit limit.</p>
-            <p class="mb-1">To defer payment and add the order amount to your account balance, reduce order items or pay
-                now.</p>
+            <p class="mb-1">The total of your order amount and outstanding balance exceeds your credit limit.</p>
+            <p class="mb-1">To postpone payment and add this order to your balance, please reduce items or proceed with
+                payment now.
+            </p>
         </div>
         <a href="{{ url_for('customer.currentOrder') }}" class="btn btn-outline-danger w-100 mb-3">
             Remove Items from Order
         </a>
         {% endif %}
         <form action="{{ url_for('customer.payByCredit') }}" method="post" class="mb-3">
+            <input type="hidden" name="order_amount" value="{{order_amount}}">
+            <input type="hidden" name="type" value="order">
             <button type="submit" class="btn btn-primary w-100 mb-2">
-                <input type="hidden" name="order_amount" value="{{order_amount}}">
                 Pay by Credit
             </button>
         </form>
         <form action="{{ url_for('customer.payByDebit') }}" method="post" class="mb-3">
             <button type="submit" class="btn btn-primary w-100 mb-2">
+                <input type="hidden" name="type" value="order">
                 <input type="hidden" name="order_amount" value="{{order_amount}}">
                 Pay by Debit
             </button>
