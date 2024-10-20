@@ -4,6 +4,7 @@ from flask import request
 from fhv.dao.customer_dao import CustomerDAO
 from fhv.dao.order_dao import OrderDAO
 from fhv.dao.payment_dao import PaymentDAO
+from fhv.dao.staff_dao import StaffDAO
 
 from fhv.services.customer_service import CustomerService
 from fhv.services.staff_service import StaffService
@@ -13,8 +14,9 @@ bp = Blueprint('staff', __name__, url_prefix='/staff')
 customer_dao = CustomerDAO()
 order_dao = OrderDAO()
 payment_dao = PaymentDAO()
+staff_dao = StaffDAO()
 
-staff_service = StaffService(customer_dao, order_dao, payment_dao)
+staff_service = StaffService(customer_dao, order_dao, payment_dao, staff_dao)
 customer_service = CustomerService(customer_dao, order_dao, payment_dao)
 
 
@@ -67,3 +69,23 @@ def customerDetails(customer_id):
                            customer=customer,
                            orders=orders,
                            payments=payments)
+
+
+@bp.route('/allProducts')
+def allProducts():
+    veggies = customer_service.get_veggies_list()
+    boxes = customer_service.get_boxes_list()
+    return render_template('all_products.html',
+                           veggies=veggies,
+                           boxes=boxes)
+
+
+@bp.route('/salesReport')
+def salesReport():
+    daily = staff_service.get_daily_sales()
+    weekly = staff_service.get_weekly_sales()
+    yearly = staff_service.get_yearly_sales()
+    return render_template('sales_report.html',
+                           daily=daily,
+                           weekly=weekly,
+                           yearly=yearly)

@@ -1,0 +1,57 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<main class="container mt-5">
+    <h1 class="text-center mb-5">Sales Report</h1>
+
+    <div class="row">
+        <!-- Daily Sales -->
+        <div class="col-md-4">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Daily Sales</h5>
+                </div>
+                <div class="card-body">
+                    {% for day in daily %}
+                    <p><strong>{{ day.date.strftime('%d/%m/%Y') }}:</strong> ${{ day.total_amount }}</p>
+                    {% else %}
+                    <p class="text-muted">No daily sales data available.</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Weekly Sales -->
+        <div class="col-md-4">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">Weekly Sales</h5>
+                </div>
+                <div class="card-body">
+                    {% for week in weekly %}
+                    <p><strong>Week {{ week.date }}:</strong> ${{ week.total_amount }}</p>
+                    {% else %}
+                    <p class="text-muted">No weekly sales data available.</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Yearly Sales -->
+        <div class="col-md-4">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">Yearly Sales</h5>
+                </div>
+                <div class="card-body">
+                    {% for year in yearly %}
+                    <p><strong>{{ year.date }}:</strong> ${{ year.total_amount }}</p>
+                    {% else %}
+                    <p class="text-muted">No yearly sales data available.</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+{% endblock %}

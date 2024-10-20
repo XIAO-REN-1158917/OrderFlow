@@ -1,7 +1,50 @@
 {% extends "layout.html" %}
+
 {% block content %}
-<p>comprehensive info of this cutomer and something</p>
-{% if session.get('order_id',none) %}
-<p>You currently have an order that needs to be processed. Please go to "Current Order" to view your current order.</p>
-{% endif %}
+<main class="container mt-5">
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <h2 class="card-title mb-4">Welcome, {{ session.get('user_username') }}!</h2>
+            <p class="lead text-muted">
+                Here, you can find all the information about your current orders, payment status, and more.
+            </p>
+
+            {% if session.get('order_id', None) %}
+            <div class="alert alert-info">
+                <p class="mb-3">
+                    You currently have an order waiting to be processed. Please follow the instructions below:
+                </p>
+                <ul class="list-group">
+                    <li class="list-group-item">
+                        <strong>View Current Order:</strong> Check your current order details to stay updated.
+                    </li>
+                    <li class="list-group-item">
+                        <strong>Buy Fresh Veggies:</strong> Browse through our selection of fresh vegetables.
+                    </li>
+                    <li class="list-group-item">
+                        <strong>Buy Premade Box:</strong> Explore premade boxes that fit your needs.
+                    </li>
+                    <li class="list-group-item">
+                        <strong>Pay Outstanding Balance:</strong> Ensure your account is up-to-date by clearing any
+                        outstanding payments.
+                    </li>
+                    <li class="list-group-item">
+                        <strong>Order & Payment History:</strong> Review your previous orders and payment history.
+                    </li>
+                </ul>
+            </div>
+            {% else %}
+            <div class="text-center text-muted">
+                <p>
+                    You currently have no active orders. Feel free to start shopping or explore your past orders
+                    anytime!
+                </p>
+                <a href="{{ url_for('customer.newOrder') }}" class="btn btn-primary btn-lg mt-3 shadow">
+                    <i class="bi bi-plus-circle me-2"></i>Create a New Order
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</main>
 {% endblock %}

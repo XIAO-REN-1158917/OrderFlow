@@ -1,9 +1,5 @@
-'''
-...\app>
-python -m flask run
-'''
 
-from app.fhv import create_app
+from fhv import create_app
 
 app = create_app()
 

@@ -25,7 +25,11 @@
                     <td>
                         <span
                             class="badge {% if customer.type == 'Corporate' %}bg-primary{% else %}bg-secondary{% endif %}">
-                            {{ customer.type }}
+                            {% if customer.type=='customer' %}
+                            private
+                            {% else %}
+                            corporate
+                            {% endif %}
                         </span>
                     </td>
                     <td>

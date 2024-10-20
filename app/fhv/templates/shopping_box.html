@@ -31,7 +31,9 @@
 
 <main class="container">
     {% if session.get('need_new_order') %}
-    <a href="{{url_for('customer.newOrder')}}" class="btn btn-primary btn-lg">Please Create a New Order</a>
+    <a href="{{ url_for('customer.newOrder') }}" class="btn btn-primary btn-lg mt-3 shadow">
+        <i class="bi bi-plus-circle me-2"></i>Create a New Order
+    </a>
     {% else %}
 
     <!-- Premade Box Selection -->

@@ -10,7 +10,13 @@
         <ul class="list-group">
             <li class="list-group-item"><strong>Username:</strong> {{ customer.username }}</li>
             <li class="list-group-item"><strong>Name:</strong> {{ customer.firstname }} {{ customer.lastname }}</li>
-            <li class="list-group-item"><strong>Type:</strong> {{ customer.type }}</li>
+            <li class="list-group-item"><strong>Type:</strong>
+                {% if customer.type=='customer' %}
+                private
+                {% else %}
+                corporate
+                {% endif %}
+            </li>
             <li class="list-group-item">
                 <strong>Credit Limit:</strong>
                 ${{ customer.max_owing if customer.type == 'customer' else customer.credit_limit }}

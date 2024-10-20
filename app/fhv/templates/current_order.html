@@ -3,12 +3,14 @@
 <main class="container mt-5">
     {% if session.get('need_new_order') %}
     <div class="alert alert-info text-center">
-        <a href="{{url_for('customer.newOrder')}}" class="btn btn-primary">Please Create a New Order</a>
+        <a href="{{ url_for('customer.newOrder') }}" class="btn btn-primary btn-lg mt-3 shadow">
+            <i class="bi bi-plus-circle me-2"></i>Create a New Order
+        </a>
     </div>
     {% else %}
     <div class="card">
         <div class="card-header bg-success text-white">
-            <h2>Draft Order Details</h2>
+            <h2>Order Details</h2>
         </div>
         <div class="card-body">
             <p><strong>Order ID:</strong> {{ draft_order_details['order'].id }}</p>
