@@ -89,3 +89,13 @@ def salesReport():
                            daily=daily,
                            weekly=weekly,
                            yearly=yearly)
+
+
+@bp.route('/mostPopular')
+def mostPopular():
+    box_result, weighted_veggie_result, packed_veggie_result, unit_veggie_result = staff_service.top_item()
+    return render_template('most_popular.html',
+                           box_result=box_result,
+                           weighted_veggie_result=weighted_veggie_result,
+                           packed_veggie_result=packed_veggie_result,
+                           unit_veggie_result=unit_veggie_result)

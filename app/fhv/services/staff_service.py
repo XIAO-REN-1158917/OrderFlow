@@ -47,3 +47,26 @@ class StaffService:
         yearly = [
             {'date': int(row.year), 'total_amount': row.total_amount} for row in result]
         return yearly
+
+    def top_item(self):
+        box_result = None
+        weighted_veggie_result = None
+        packed_veggie_result = None
+        unit_veggie_result = None
+        orders = self.order_dao.get_order_list_by_status('fulfilled')
+        item_id_list = self.order_dao.get_item_ids_by_orders(orders)
+        result = self.order_dao.count_all_type_and_content(item_id_list)
+        for r in result:
+            if r['type'] == 'premade_box':
+                box_result = self.staff_dao.count_most_popular_box_size(
+                    r['content'])
+            elif r['type'] == 'weighted_veggie':
+                weighted_veggie_result = self.staff_dao.count_most_popular_weighted_veggie(
+                    r['content'])
+            elif r['type'] == 'pack_veggie':
+                packed_veggie_result = self.staff_dao.count_most_popular_packed_veggie(
+                    r['content'])
+            elif r['type'] == 'unit_veggie':
+                unit_veggie_result = self.staff_dao.count_most_popular_unit_veggie(
+                    r['content'])
+        return box_result, weighted_veggie_result, packed_veggie_result, unit_veggie_result

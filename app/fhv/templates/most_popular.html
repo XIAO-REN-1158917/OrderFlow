@@ -1,0 +1,69 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<main class="container mt-5">
+    <h2 class="text-center mb-5">Most Popular Items</h2>
+
+    <div class="row">
+        <!-- Premade Box -->
+        {% if box_result %}
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Most Popular Premade Box</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>Type:</strong> {{ box_result['type'] }}</p>
+                    <p><strong>Total Sold:</strong> {{ box_result['count'] }}</p>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Weighted Veggie -->
+        {% if weighted_veggie_result %}
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">Most Popular Weighted Veggie</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>Name:</strong> {{ weighted_veggie_result['name'] }}</p>
+                    <p><strong>Total Weight:</strong> {{ weighted_veggie_result['total_weight'] }} Kg</p>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Packed Veggie -->
+        {% if packed_veggie_result %}
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0">Most Popular Packed Veggie</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>Name:</strong> {{ packed_veggie_result['name'] }}</p>
+                    <p><strong>Total Packs:</strong> {{ packed_veggie_result['total_packs'] }} Packs</p>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Unit Veggie -->
+        {% if unit_veggie_result %}
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">Most Popular Unit Veggie</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>Name:</strong> {{ unit_veggie_result['name'] }}</p>
+                    <p><strong>Total Units:</strong> {{ unit_veggie_result['total_units'] }} Units</p>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</main>
+{% endblock %}

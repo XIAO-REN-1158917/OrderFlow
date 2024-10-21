@@ -1,7 +1,7 @@
 from decimal import Decimal
 from typing import List, Optional
 
-from sqlalchemy import desc
+from sqlalchemy import desc, func
 from fhv.exts import db
 from sqlalchemy.orm import joinedload
 from fhv.models import Item, Veggies, PremadeBox, WeightedVeggie, PackVeggie, UnitVeggie, Order, OrderItem
@@ -128,3 +128,42 @@ class OrderDAO:
         orders = Order.query.filter_by(
             status=status).order_by(desc(Order.order_date)).all()
         return orders if orders else None
+
+    # def count_most_popular_type(self, all_items_id):
+    #     result = db.session.query(Item.type, func.count(Item.type).label('count')).filter(
+    #         Item.id.in_(all_items_id)).group_by(Item.type).order_by(func.count(Item.type).desc()).first()
+    #     if result:
+    #         result_dict = {"type": result[0], "count": result[1]}
+    #     return result_dict
+
+    def count_all_type_and_content(self, all_items_id):
+        results = (
+            db.session.query(Item.type, func.count(Item.id).label('count'))
+            .filter(Item.id.in_(all_items_id))
+            .group_by(Item.type)
+            .all()
+        )
+
+        result_list = []
+        for type_name, count in results:
+            items = (
+                db.session.query(Item)
+                .filter(Item.type == type_name, Item.id.in_(all_items_id))
+                .all()
+            )
+
+            result_dict = {
+                "type": type_name,
+                "count": count,
+                "content": items
+            }
+            result_list.append(result_dict)
+
+        return result_list
+
+    def get_item_ids_by_orders(self, orders):
+        item_ids = []
+        for order in orders:
+            order_item = OrderItem.query.filter_by(order_id=order.id).first()
+            item_ids.append(order_item.item_id)
+        return item_ids
