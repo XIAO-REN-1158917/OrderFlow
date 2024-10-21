@@ -4,7 +4,7 @@ from .config import DevelopmentConfig
 from .blueprints.user import bp as user_bp
 from fhv.blueprints.staff import bp as staff_bp
 from fhv.blueprints.customer import bp as customer_bp
-from .models import Customer, Staff, CorporateCustomer, Person
+from .models import Person, Customer, Staff, CorporateCustomer
 
 
 def create_app(config_class=DevelopmentConfig):

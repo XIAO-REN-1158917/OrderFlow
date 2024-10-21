@@ -10,6 +10,3 @@ class DevelopmentConfig(Config):
 
 class ProductionConfig(Config):
     SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://username:password@prod-db-host/proddb'
-
-
-# TestingConfigu(Config) ??

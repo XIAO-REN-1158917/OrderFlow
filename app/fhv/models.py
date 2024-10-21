@@ -24,9 +24,6 @@ class Person(db.Model):
         self.username = username
         self.password = password
 
-    def check_password(self, password: str) -> bool:
-        return self.password == password
-
 
 class Staff(Person):
     __tablename__ = 'staff'

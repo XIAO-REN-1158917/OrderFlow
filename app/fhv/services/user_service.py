@@ -2,14 +2,15 @@ from flask import session
 from fhv.dao.user_dao import UserDAO
 
 
-class LoginService:
+class UserService:
     def __init__(self, person_dao: UserDAO):
         self.person_dao = person_dao
 
     def login(self, username: str, password: str):
         person = self.person_dao.get_person_by_username(username)
+        loginAuth = self.person_dao.check_password(person, password)
 
-        if person and person.check_password(password):
+        if person and loginAuth:
             session['user_id'] = person.id
             session['user_username'] = person.username
             session['user_firstname'] = person.firstname
