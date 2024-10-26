@@ -243,11 +243,6 @@ def toggleDelivery():
     return redirect(url_for('customer.currentOrder'))
 
 
-@bp.route('/myProfile/<int:user_id>')
-def myProfile(user_id):
-    return render_template('myProfile.html')
-
-
 @bp.route('/myOrders')
 def myOrders():
     user_id = session.get('user_id')
