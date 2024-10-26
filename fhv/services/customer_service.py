@@ -1,3 +1,6 @@
+'''
+Here are the business requirements for the customer.
+'''
 from fhv.exts import db
 from fhv.dao.customer_dao import CustomerDAO
 from fhv.dao.order_dao import OrderDAO
@@ -13,6 +16,11 @@ class CustomerService:
         self.payment_dao = payment_dao
 
     def get_veggies_list(self):
+        """
+        This is just static data. I didn't store the static data in the database 
+        because this project focuses more on order processing. 
+        Additionally, there is no need for any editing of the static product data.
+        """
         veggies = [
             {
                 'name': 'Carrot(wei)',
@@ -85,6 +93,9 @@ class CustomerService:
                 return veggie['type']
 
     def get_boxes_list(self):
+        '''
+        This is just static data, documenting my definitions for the premade boxes.
+        '''
         premade_boxes = [
             {'name': 'Small Box', 'capacity': 3},
             {'name': 'Medium Box', 'capacity': 5},
@@ -134,8 +145,8 @@ class CustomerService:
         if draft_order:
             items = self.order_dao.get_order_items_by_order_id(draft_order.id)
             draft_order_details = {
-                'order': draft_order,
-                'items': items
+                'order': draft_order,  # order info
+                'items': items  # order items info
             }
         else:
             draft_order_details = None
@@ -148,14 +159,6 @@ class CustomerService:
         return order
 
     def remove_item_form_order(self, order_id, item_id, item_price):
-        # item_type = self.order_dao.get_type_by_item_id(item_id)
-        # if item_type == 'premade_box':
-        #     box = self.customer_dao.get_box_by_id(item_id)
-        #     for veggie in box.content:
-        #         item_to_delete = Item.query.get(veggie.id)
-        #         db.session.delete(item_to_delete)
-        #         db.session.commit()
-
         item_to_delete = Item.query.get(item_id)
         db.session.delete(item_to_delete)
         db.session.commit()

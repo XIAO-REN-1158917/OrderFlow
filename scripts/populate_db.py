@@ -1,6 +1,14 @@
 '''
 Run the following command in the root directory
 python -m scripts.populate_db
+
+!!!!!!!!!!!!!!!!
+Only person(staff and customer) data is populated here; 
+all order and payment data needs to be added manually. 
+After deployment on PythonAnywhere, 
+I will manually add some data to make it easier for the instructor to see the functionality in action. 
+If you're starting from scratch locally, you'll need to add the order and payment data yourself.
+!!!!!!!!!!!!!!!!
 '''
 from datetime import date
 from fhv import create_app, db

@@ -129,13 +129,6 @@ class OrderDAO:
             status=status).order_by(desc(Order.order_date)).all()
         return orders if orders else None
 
-    # def count_most_popular_type(self, all_items_id):
-    #     result = db.session.query(Item.type, func.count(Item.type).label('count')).filter(
-    #         Item.id.in_(all_items_id)).group_by(Item.type).order_by(func.count(Item.type).desc()).first()
-    #     if result:
-    #         result_dict = {"type": result[0], "count": result[1]}
-    #     return result_dict
-
     def count_all_type_and_content(self, all_items_id):
         results = (
             db.session.query(Item.type, func.count(Item.id).label('count'))

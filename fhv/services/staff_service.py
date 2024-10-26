@@ -1,3 +1,6 @@
+'''
+Here are the business requirements for the staff.
+'''
 from fhv.exts import db
 from fhv.dao.customer_dao import CustomerDAO
 from fhv.dao.order_dao import OrderDAO
@@ -49,6 +52,12 @@ class StaffService:
         return yearly
 
     def top_item(self):
+        """
+        There are four types of products, each displaying the top-selling item. 
+        If it's a premade box, the most popular size is shown. 
+        For vegetables, the total sales are calculated by summing their quantities(kilo or packs or unit), 
+        identifying the one with the highest cumulative sales.
+        """
         box_result = None
         weighted_veggie_result = None
         packed_veggie_result = None
