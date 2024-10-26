@@ -1,6 +1,38 @@
 {% extends "layout.html" %}
+
 {% block content %}
+<main class="container mt-5">
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <h2 class="card-title mb-4">Welcome, {{ session.get('user_username') }}!</h2>
+            <p class="lead text-muted">
+                Here, you can manage current orders, view reports, access customer information, and more.
+            </p>
 
-<p>This is staff index</p>
-
+            <div class="alert alert-info">
+                <p class="mb-3">Please explore the following staff functions:</p>
+                <ul class="list-group">
+                    <li class="list-group-item">
+                        <strong>Current Orders:</strong> Manage and track pending orders.
+                    </li>
+                    <li class="list-group-item">
+                        <strong>Previous Orders:</strong> Review fulfilled orders.
+                    </li>
+                    <li class="list-group-item">
+                        <strong>Customer List:</strong> Access information about all customers.
+                    </li>
+                    <li class="list-group-item">
+                        <strong>All Products:</strong> Browse the full product catalogue.
+                    </li>
+                    <li class="list-group-item">
+                        <strong>Sales Report:</strong> Analyse sales data and trends.
+                    </li>
+                    <li class="list-group-item">
+                        <strong>Most Popular Products:</strong> Identify the top-selling items.
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</main>
 {% endblock %}

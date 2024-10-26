@@ -1,4 +1,4 @@
-from flask import Blueprint, redirect, url_for, session
+from flask import Blueprint, redirect
 from flask import render_template
 from flask import request
 from fhv.dao.customer_dao import CustomerDAO

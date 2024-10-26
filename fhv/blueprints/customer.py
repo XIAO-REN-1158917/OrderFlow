@@ -9,7 +9,7 @@ from fhv.services.customer_service import CustomerService
 
 bp = Blueprint('customer', __name__, url_prefix='/customer')
 
-# Instantiate DAO and service objects once
+# Instantiate DAO and service objects
 customer_dao = CustomerDAO()
 order_dao = OrderDAO()
 payment_dao = PaymentDAO()
