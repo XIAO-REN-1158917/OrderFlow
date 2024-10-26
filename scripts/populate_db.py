@@ -1,5 +1,5 @@
 '''
-Run the following command in the app directory
+Run the following command in the root directory
 python -m scripts.populate_db
 '''
 from datetime import date

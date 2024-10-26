@@ -1,5 +1,7 @@
+'''
+Here is the class model file, containing all the classes to be created and their inheritance relationships.
+'''
 from datetime import date, datetime
-
 from sqlalchemy import Numeric
 from fhv.exts import db
 
