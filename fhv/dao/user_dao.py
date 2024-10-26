@@ -1,4 +1,4 @@
-from fhv.models import Person, Customer, CorporateCustomer
+from fhv.models import Person
 from fhv.exts import db
 
 
