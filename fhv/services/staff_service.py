@@ -39,8 +39,8 @@ class StaffService:
     def get_weekly_sales(self):
         result = self.staff_dao.get_weekly_sales_data()
         weekly = [
-            {'date': f"{
-                row.year}-W{int(row.week):02}", 'total_amount': row.total_amount}
+            {'date': f"{row.year}-W{int(row.week):02}",
+             'total_amount': row.total_amount}
             for row in result
         ]
         return weekly
